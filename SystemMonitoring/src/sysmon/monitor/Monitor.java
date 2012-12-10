@@ -134,7 +134,6 @@ public class Monitor {
 	
 	/**
 	 * MonitorWork continuously fetch the dynamic metadata using a specified Crawler.
-	 * @author Yexi Jiang (http://users.cs.fiu.edu/~yjian004)
 	 *
 	 */
 	public class CrawlerWorker implements Runnable{
@@ -168,7 +167,6 @@ public class Monitor {
 	
 	/**
 	 * Send the dynamic meta data to broker periodically.
-	 * @author Yexi Jiang (http://users.cs.fiu.edu/~yjian004)
 	 *
 	 */
 	class MetadataMessageSender implements Runnable{
@@ -237,7 +235,6 @@ public class Monitor {
 	
 	/**
 	 * MonitorCommandSender is in charge of sending command to manager.
-	 * @author Yexi Jiang (http://users.cs.fiu.edu/~yjian004)
 	 *
 	 */
 	class MonitorCommandSender extends InitiativeCommandHandler {
@@ -254,10 +251,11 @@ public class Monitor {
 			Out.println("In register to manager. Register to " + this.remoteBrokerAddress);
 			TextMessage registerCommandMessage = commandServiceSession.createTextMessage();
 			JsonObject commandJson = new JsonObject();
-			commandJson.addProperty("type", "registration");
+			commandJson.addProperty("type", "monitor-registration");
 			commandJson.addProperty("machine-name", monitorIPAddress);
 			String correlateionID = UUID.randomUUID().toString();
 			registerCommandMessage.setJMSCorrelationID(correlateionID);
+			registerCommandMessage.setJMSReplyTo(this.commandServiceTemporaryQueue);
 			registerCommandMessage.setText(commandJson.toString());
 			commandProducer.send(registerCommandMessage);
 		}
@@ -268,7 +266,7 @@ public class Monitor {
 				try {
 					String commandJson = ((TextMessage) commandMessage).getText();
 					JsonObject jsonObj = (JsonObject)jsonParser.parse(commandJson);
-					if(jsonObj.get("type").getAsString().equals("registration-response")) {
+					if(jsonObj.get("type").getAsString().equals("monitor-registration-response")) {
 						Out.println("Registration successfully.");
 					}
 				} catch (JMSException e) {
