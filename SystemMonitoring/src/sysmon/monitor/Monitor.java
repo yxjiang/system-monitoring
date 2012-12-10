@@ -8,6 +8,7 @@ import java.util.UUID;
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -16,8 +17,11 @@ import javax.jms.Topic;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.BrokerService;
 
+import sysmon.common.InitiativeCommandHandler;
 import sysmon.monitor.crawler.Crawler;
+import sysmon.util.GlobalParameters;
 import sysmon.util.IPUtil;
+import sysmon.util.Out;
 
 import com.google.gson.JsonObject;
 
@@ -28,24 +32,29 @@ import com.google.gson.JsonObject;
  */
 public class Monitor {
 	
-	private String ipAddress;
+	private String managerBrokerAddress;
+	private String monitorIPAddress;
 	private long moniterInterval = 1;	//	In seconds
 	private long metaDataSendingInterval = 1;	//	In seconds
 	private Map<String, CrawlerWorker> crawlers;
 	private JsonObject assembledStaticMetaData;
 	private JsonObject assembledDynamicMetaData;
+	private MonitorCommandSender commandSender;
 	
-	public Monitor(long monitoringInterval, long metaDataSendingInterval) {
-		this.ipAddress = IPUtil.getFirstAvailableIP();
+	public Monitor(String managerBrokerAddress, long monitoringInterval, long metaDataSendingInterval) {
+		this.managerBrokerAddress = managerBrokerAddress;
+		this.monitorIPAddress = IPUtil.getFirstAvailableIP();
 		this.crawlers = new HashMap<String, CrawlerWorker>();
 		this.assembledStaticMetaData = new JsonObject();
 		this.assembledDynamicMetaData = new JsonObject();
 		setMonitorInterval(monitoringInterval);
 		setMetaDataSendingInterval(metaDataSendingInterval);
+		this.commandSender = new MonitorCommandSender(this.managerBrokerAddress);
+		this.commandSender.init();
 	}
 	
-	public Monitor() {
-		this(1, 1);
+	public Monitor(String managerBrokerAddress) {
+		this(managerBrokerAddress, 1, 1);
 	}
 	
 	public void setMonitorInterval(long second) {
@@ -65,6 +74,11 @@ public class Monitor {
 		MetadataMessageSender metadataSender = new MetadataMessageSender();
 		Thread metaDataSenderThread = new Thread(metadataSender);
 		metaDataSenderThread.start();
+		try {
+			commandSender.registerToManager();
+		} catch (JMSException e1) {
+			e1.printStackTrace();
+		}
 	}
 	
 	/**
@@ -90,6 +104,7 @@ public class Monitor {
 	 * Assemble the static metadata from each crawler.
 	 */
 	private void assembleStaticMetaData() {
+		this.assembledDynamicMetaData.addProperty("machine-name", this.monitorIPAddress);
 		for(Map.Entry<String, CrawlerWorker> entry : crawlers.entrySet()) {
 			this.assembledStaticMetaData.add(entry.getKey(), entry.getValue().getCrawler().getStaticMetaData());
 		}
@@ -158,13 +173,13 @@ public class Monitor {
 	 */
 	class MetadataMessageSender implements Runnable{
 		
-		private String brokerIPAddress;
+		private String brokerAddress;
 		private BrokerService broker;
 		private MessageProducer metaDataProducer;
 		private Session metaDataSession;
 		
 		public MetadataMessageSender() {
-			this.brokerIPAddress = ipAddress;
+			this.brokerAddress = monitorIPAddress;
 			createBroker();
 			try {
 				initMetaDataStreamService();
@@ -179,7 +194,7 @@ public class Monitor {
 			try {
 				broker.setPersistent(false);
 				broker.setUseJmx(false);
-				broker.addConnector("tcp://" + this.brokerIPAddress + ":32100");
+				broker.addConnector("tcp://" + this.brokerAddress + ":32100");
 				broker.start();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -187,7 +202,7 @@ public class Monitor {
 		}
 		
 		public void initMetaDataStreamService() throws JMSException {
-			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://" + this.brokerIPAddress + ":32100");
+			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://" + this.brokerAddress + ":32100");
 			Connection connection = connectionFactory.createConnection();
 			connection.start();
 			metaDataSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -198,13 +213,13 @@ public class Monitor {
 		}
 		
 		public void sendMonitoredData() throws Exception{
-			TextMessage message = metaDataSession.createTextMessage();
+			TextMessage metadataJsonMessage = metaDataSession.createTextMessage();
 			JsonObject assembledDynamicMetaData = assembleDynamicMetaData();
-			message.setText(assembledDynamicMetaData.toString());
+			metadataJsonMessage.setText(assembledDynamicMetaData.toString());
 			
 			String correlateionID = UUID.randomUUID().toString();
-			message.setJMSCorrelationID(correlateionID);
-			this.metaDataProducer.send(message);
+			metadataJsonMessage.setJMSCorrelationID(correlateionID);
+			this.metaDataProducer.send(metadataJsonMessage);
 		}
 		
 		@Override
@@ -219,5 +234,51 @@ public class Monitor {
 			}
 		}
 	}
+	
+	/**
+	 * MonitorCommandSender is in charge of sending command to manager.
+	 * @author Yexi Jiang (http://users.cs.fiu.edu/~yjian004)
+	 *
+	 */
+	class MonitorCommandSender extends InitiativeCommandHandler {
+
+		public MonitorCommandSender(String commandBrokerAddress) {
+			super(commandBrokerAddress);
+		}
+
+		/**
+		 * Register the monitor.
+		 * @throws JMSException 
+		 */
+		public void registerToManager() throws JMSException {
+			Out.println("In register to manager. Register to " + this.remoteBrokerAddress);
+			TextMessage registerCommandMessage = commandServiceSession.createTextMessage();
+			JsonObject commandJson = new JsonObject();
+			commandJson.addProperty("type", "registration");
+			commandJson.addProperty("machine-name", monitorIPAddress);
+			String correlateionID = UUID.randomUUID().toString();
+			registerCommandMessage.setJMSCorrelationID(correlateionID);
+			registerCommandMessage.setText(commandJson.toString());
+			commandProducer.send(registerCommandMessage);
+		}
+		
+		@Override
+		public void onMessage(Message commandMessage) {
+			if(commandMessage instanceof TextMessage) {
+				try {
+					String commandJson = ((TextMessage) commandMessage).getText();
+					JsonObject jsonObj = (JsonObject)jsonParser.parse(commandJson);
+					if(jsonObj.get("type").getAsString().equals("registration-response")) {
+						Out.println("Registration successfully.");
+					}
+				} catch (JMSException e) {
+					e.printStackTrace();
+				}
+				
+			}
+		}
+
+	}
+	
 	
 }

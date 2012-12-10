@@ -2,6 +2,7 @@ package sysmon.monitor;
 
 import sysmon.monitor.crawler.Crawler;
 import sysmon.monitor.crawler.DummyCrawler;
+import sysmon.util.GlobalParameters;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,8 +10,8 @@ import com.google.gson.GsonBuilder;
 public class TestMonitor {
 	
 	public static void test() {
-		
-		Monitor m = new Monitor();
+		String managerBrokerAddress = "tcp://192.168.0.100:" + GlobalParameters.MANAGER_SERVICE_PORT;
+		Monitor m = new Monitor(managerBrokerAddress);
 		for(int i = 0; i < 6; ++i) {
 			Crawler crawler = new DummyCrawler("dummy" + i);
 			m.addCrawler(crawler);
