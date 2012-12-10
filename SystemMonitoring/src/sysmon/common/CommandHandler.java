@@ -35,14 +35,6 @@ public abstract class CommandHandler implements MessageListener{
 		this.jsonParser = new JsonParser();
 	}
 	
-	public void init() {
-		try {
-			initCommandService();
-		} catch (JMSException e) {
-			e.printStackTrace();
-		}
-	}
-	
 	/**
 	 * Initialize the command service.
 	 * @throws JMSException

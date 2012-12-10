@@ -29,6 +29,11 @@ public abstract class PassiveCommandHandler extends	CommandHandler {
 		this.servicePort = servicePort;
 		this.brokerAddress = "tcp://" + ipAddress + ":" + servicePort;
 		createCommandServiceBroker();
+		try {
+			initCommandService();
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**

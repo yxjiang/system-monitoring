@@ -7,7 +7,10 @@ package sysmon.util;
  */
 public class GlobalParameters {
 	
-	public final static String MANAGER_SERVICE_PORT = "32097";
-	public final static String MONITOR_SERVICE_PORT = "32099";
+	public final static String MANAGER_COMMAND_PORT = "32097";
+	public final static String COLLECTOR_COMMAND_PORT = "32098";
+	public final static String MONITOR_COMMAND_PORT = "32099";
+
+	
 
 }

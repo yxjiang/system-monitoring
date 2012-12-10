@@ -41,8 +41,7 @@ public class MonitoringManager {
 	
 	private MonitoringManager() {
 		this.collectors = new HashMap<String, CollectorProfile>();
-		this.passiveCommandHandler = new ManagerPassiveCommandHandler(GlobalParameters.MANAGER_SERVICE_PORT);
-		this.passiveCommandHandler.init();
+		this.passiveCommandHandler = new ManagerPassiveCommandHandler(GlobalParameters.MANAGER_COMMAND_PORT);
 	}
 	
 	/**
@@ -54,11 +53,11 @@ public class MonitoringManager {
 		public String collectorBrokerAddress;
 		public long secondSinceLastConnected;
 		public CollectorProfile(String collectorIPAddress,
-				String collectorBrokerAddress, long secondSinceLastConnected) {
+				String collectorBrokerAddress) {
 			super();
 			this.collectorIPAddress = collectorIPAddress;
 			this.collectorBrokerAddress = collectorBrokerAddress;
-			this.secondSinceLastConnected = secondSinceLastConnected;
+			this.secondSinceLastConnected = 0;
 		}
 	}
 	
@@ -77,6 +76,9 @@ public class MonitoringManager {
 		public void onMessage(Message commandMessage) {
 			
 			if(commandMessage instanceof TextMessage) {
+				/*
+				 * If success, return {type: "monitor-registration-response", value: "success"}
+				 */
 				String commandJson;
 				try {
 					TextMessage responseMessage = this.commandServiceSession.createTextMessage();
@@ -96,16 +98,20 @@ public class MonitoringManager {
 						Out.println("Monitor [" + monitorName + "] registered.");
 					}
 					else if(eventType.equals("collector-registration")) {
-						String collectorIPAddress = jsonObj.get("IP").getAsString();
-						String collectorBrokerAddress = jsonObj.get("brokerAddress").getAsString();
-						CollectorProfile profile = new CollectorProfile(collectorIPAddress, collectorBrokerAddress, 0);
+						/*
+						 * If success, return {type: "collector-registration-response", value: "success"}
+						 */
+						String collectorIPAddress = jsonObj.get("collectorIPAddress").getAsString();
+						String collectorBrokerAddress = jsonObj.get("collectorBrokerAddress").getAsString();
+						CollectorProfile profile = new CollectorProfile(collectorIPAddress, collectorBrokerAddress);
 						collectors.put(collectorIPAddress, profile);
 						JsonObject responseJson = new JsonObject();
-						responseJson.addProperty("collector-registration-response", "success");
+						responseJson.addProperty("type", "collector-registration-response");
+						responseJson.addProperty("value", "success");
 						responseMessage.setJMSCorrelationID(commandMessage.getJMSCorrelationID());
 						responseMessage.setText(responseJson.toString());
 						this.commandProducer.send(commandMessage.getJMSReplyTo(), responseMessage);
-						Out.println("Collector [" + collectorIPAddress + "] registered.");
+						Out.println("Collector [" + collectorIPAddress + ":] registered.");
 					}
 
 				} catch (JMSException e) {

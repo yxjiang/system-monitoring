@@ -10,7 +10,7 @@ import com.google.gson.GsonBuilder;
 public class TestMonitor {
 	
 	public static void test() {
-		String managerBrokerAddress = "tcp://192.168.0.100:" + GlobalParameters.MANAGER_SERVICE_PORT;
+		String managerBrokerAddress = "tcp://192.168.0.100:" + GlobalParameters.MANAGER_COMMAND_PORT;
 		Monitor m = new Monitor(managerBrokerAddress);
 		for(int i = 0; i < 6; ++i) {
 			Crawler crawler = new DummyCrawler("dummy" + i);

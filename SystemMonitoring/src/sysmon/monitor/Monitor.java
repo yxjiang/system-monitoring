@@ -50,7 +50,6 @@ public class Monitor {
 		setMonitorInterval(monitoringInterval);
 		setMetaDataSendingInterval(metaDataSendingInterval);
 		this.commandSender = new MonitorCommandSender(this.managerBrokerAddress);
-		this.commandSender.init();
 	}
 	
 	public Monitor(String managerBrokerAddress) {
@@ -247,8 +246,7 @@ public class Monitor {
 		 * Register the monitor.
 		 * @throws JMSException 
 		 */
-		public void registerToManager() throws JMSException {
-			Out.println("In register to manager. Register to " + this.remoteBrokerAddress);
+		private void registerToManager() throws JMSException {
 			TextMessage registerCommandMessage = commandServiceSession.createTextMessage();
 			JsonObject commandJson = new JsonObject();
 			commandJson.addProperty("type", "monitor-registration");
@@ -263,10 +261,14 @@ public class Monitor {
 		@Override
 		public void onMessage(Message commandMessage) {
 			if(commandMessage instanceof TextMessage) {
+				/*
+				 * If success, receive {type: "monitor-registration-response", value: "success"}
+				 */
 				try {
 					String commandJson = ((TextMessage) commandMessage).getText();
 					JsonObject jsonObj = (JsonObject)jsonParser.parse(commandJson);
-					if(jsonObj.get("type").getAsString().equals("monitor-registration-response")) {
+					if(jsonObj.get("type").getAsString().equals("monitor-registration-response") && 
+							jsonObj.get("value").getAsString().equals("success")) {
 						Out.println("Registration successfully.");
 					}
 				} catch (JMSException e) {

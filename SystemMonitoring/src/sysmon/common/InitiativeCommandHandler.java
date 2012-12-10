@@ -21,6 +21,11 @@ public abstract class InitiativeCommandHandler extends	CommandHandler {
 	
 	public InitiativeCommandHandler(String remoteBrokerAddress) {
 		this.remoteBrokerAddress = remoteBrokerAddress;
+		try {
+			initCommandService();
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
