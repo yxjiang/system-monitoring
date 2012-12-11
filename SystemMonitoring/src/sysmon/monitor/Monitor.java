@@ -34,12 +34,16 @@ public class Monitor {
 	
 	private String managerBrokerAddress;
 	private String monitorIPAddress;
+	private String monitorDataBrokerAddress;
+	private String monitorCommandBrokerAddress;
 	private long moniterInterval = 1;	//	In seconds
 	private long metaDataSendingInterval = 1;	//	In seconds
 	private Map<String, CrawlerWorker> crawlers;
 	private JsonObject assembledStaticMetaData;
 	private JsonObject assembledDynamicMetaData;
 	private MonitorCommandSender commandSender;
+	
+	private String collectorCommandBrokerAddress;
 	
 	public Monitor(String managerBrokerAddress, long monitoringInterval, long metaDataSendingInterval) {
 		this.managerBrokerAddress = managerBrokerAddress;
@@ -177,6 +181,7 @@ public class Monitor {
 		
 		public MetadataMessageSender() {
 			this.brokerAddress = monitorIPAddress;
+			monitorDataBrokerAddress = "tcp://" + this.brokerAddress + ":" + GlobalParameters.MONITOR_DATA_PORT;
 			createBroker();
 			try {
 				initMetaDataStreamService();
@@ -258,6 +263,29 @@ public class Monitor {
 			commandProducer.send(registerCommandMessage);
 		}
 		
+		/**
+		 * Enroll to an assigned collector.
+		 * @throws JMSException
+		 */
+		private void monitorEnroll() throws JMSException {
+			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(collectorCommandBrokerAddress);
+			Connection connection = connectionFactory.createConnection();
+			connection.start();
+			Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			
+			Topic topic = session.createTopic("command");
+			MessageProducer producer = session.createProducer(topic);
+			producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+			JsonObject jsonObj = new JsonObject();
+			jsonObj.addProperty("type", "monitor-enroll");
+			jsonObj.addProperty("monitorDataBrokerAddress", monitorDataBrokerAddress);
+			jsonObj.addProperty("monitorIPAddress", monitorIPAddress);
+			jsonObj.add("staticMetadata", assembledStaticMetaData);
+			TextMessage enrollCommandMessage = session.createTextMessage();
+			enrollCommandMessage.setText(jsonObj.toString());
+			producer.send(enrollCommandMessage);
+		}
+		
 		@Override
 		public void onMessage(Message commandMessage) {
 			if(commandMessage instanceof TextMessage) {
@@ -269,6 +297,9 @@ public class Monitor {
 					JsonObject jsonObj = (JsonObject)jsonParser.parse(commandJson);
 					if(jsonObj.get("type").getAsString().equals("monitor-registration-response") && 
 							jsonObj.get("value").getAsString().equals("success")) {
+						collectorCommandBrokerAddress = jsonObj.get("collectorCommandBrokerAddress").getAsString();
+						Out.println("Intend to enroll to " + collectorCommandBrokerAddress);
+						monitorEnroll();
 						Out.println("Registration successfully.");
 					}
 				} catch (JMSException e) {

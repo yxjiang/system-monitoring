@@ -92,6 +92,13 @@ public class MonitoringManager {
 						JsonObject responseJson = new JsonObject();
 						responseJson.addProperty("type", "monitor-registration-response");
 						responseJson.addProperty("value", "success");
+						String firstCollectorCommandBrokerAddress = null;
+						for(Map.Entry<String, CollectorProfile> entry : collectors.entrySet()) {
+							firstCollectorCommandBrokerAddress = entry.getValue().collectorBrokerAddress;
+							break;
+						}
+						Out.println("Assign " + monitorName + " to " + firstCollectorCommandBrokerAddress);
+						responseJson.addProperty("collectorCommandBrokerAddress", firstCollectorCommandBrokerAddress);
 						responseMessage.setJMSCorrelationID(commandMessage.getJMSCorrelationID());
 						responseMessage.setText(responseJson.toString());
 						this.commandProducer.send(commandMessage.getJMSReplyTo(), responseMessage);
