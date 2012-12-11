@@ -88,10 +88,12 @@ public class MonitoringManager {
 					//	monitor registration event
 					String eventType = jsonObj.get("type").getAsString();
 					if(eventType.equals("monitor-registration")) {
-						String monitorName = jsonObj.get("machine-name").getAsString();
+						String monitorName = jsonObj.get("machineIPAddress").getAsString();
 						JsonObject responseJson = new JsonObject();
 						responseJson.addProperty("type", "monitor-registration-response");
 						responseJson.addProperty("value", "success");
+						
+						//	find an available collector
 						String firstCollectorCommandBrokerAddress = null;
 						for(Map.Entry<String, CollectorProfile> entry : collectors.entrySet()) {
 							firstCollectorCommandBrokerAddress = entry.getValue().collectorBrokerAddress;

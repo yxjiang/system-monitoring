@@ -33,9 +33,7 @@ import com.google.gson.JsonObject;
 public class Monitor {
 	
 	private String managerBrokerAddress;
-	private String monitorIPAddress;
-	private String monitorDataBrokerAddress;
-	private String monitorCommandBrokerAddress;
+	private String machinerIPAddress;
 	private long moniterInterval = 1;	//	In seconds
 	private long metaDataSendingInterval = 1;	//	In seconds
 	private Map<String, CrawlerWorker> crawlers;
@@ -44,10 +42,11 @@ public class Monitor {
 	private MonitorCommandSender commandSender;
 	
 	private String collectorCommandBrokerAddress;
+	private Boolean collectorCommandBrokerAddressAvailable = false;
 	
 	public Monitor(String managerBrokerAddress, long monitoringInterval, long metaDataSendingInterval) {
 		this.managerBrokerAddress = managerBrokerAddress;
-		this.monitorIPAddress = IPUtil.getFirstAvailableIP();
+		this.machinerIPAddress = IPUtil.getFirstAvailableIP();
 		this.crawlers = new HashMap<String, CrawlerWorker>();
 		this.assembledStaticMetaData = new JsonObject();
 		this.assembledDynamicMetaData = new JsonObject();
@@ -74,14 +73,14 @@ public class Monitor {
 	public void start() {
 		assembleStaticMetaData();
 		startMonitorWorkers();
-		MetadataMessageSender metadataSender = new MetadataMessageSender();
-		Thread metaDataSenderThread = new Thread(metadataSender);
-		metaDataSenderThread.start();
 		try {
 			commandSender.registerToManager();
 		} catch (JMSException e1) {
 			e1.printStackTrace();
 		}
+		MetadataMessageSender metadataSender = new MetadataMessageSender();
+		Thread metaDataSenderThread = new Thread(metadataSender);
+		metaDataSenderThread.start();
 	}
 	
 	/**
@@ -107,7 +106,7 @@ public class Monitor {
 	 * Assemble the static metadata from each crawler.
 	 */
 	private void assembleStaticMetaData() {
-		this.assembledDynamicMetaData.addProperty("machine-name", this.monitorIPAddress);
+		this.assembledDynamicMetaData.addProperty("machine-name", this.machinerIPAddress);
 		for(Map.Entry<String, CrawlerWorker> entry : crawlers.entrySet()) {
 			this.assembledStaticMetaData.add(entry.getKey(), entry.getValue().getCrawler().getStaticMetaData());
 		}
@@ -174,15 +173,12 @@ public class Monitor {
 	 */
 	class MetadataMessageSender implements Runnable{
 		
-		private String brokerAddress;
-		private BrokerService broker;
+//		private BrokerService broker;
 		private MessageProducer metaDataProducer;
 		private Session metaDataSession;
 		
 		public MetadataMessageSender() {
-			this.brokerAddress = monitorIPAddress;
-			monitorDataBrokerAddress = "tcp://" + this.brokerAddress + ":" + GlobalParameters.MONITOR_DATA_PORT;
-			createBroker();
+//			createBroker();
 			try {
 				initMetaDataStreamService();
 			} catch (JMSException e) {
@@ -190,34 +186,57 @@ public class Monitor {
 			}
 		}
 		
-		private void createBroker() {
-			broker = new BrokerService();
-			broker.setBrokerName("testBroker");
-			try {
-				broker.setPersistent(false);
-				broker.setUseJmx(false);
-				broker.addConnector("tcp://" + this.brokerAddress + ":32100");
-				broker.start();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+//		private void createBroker() {
+//			broker = new BrokerService();
+//			broker.setBrokerName("testBroker");
+//			try {
+//				broker.setPersistent(false);
+//				broker.setUseJmx(false);
+//				broker.addConnector(collectorCommandBrokerAddress);
+//				broker.start();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
 		
 		public void initMetaDataStreamService() throws JMSException {
-			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://" + this.brokerAddress + ":32100");
+			//	wait for collector broker address available
+//			synchronized(collectorCommandBrokerAddressAvailable) {
+//				while(collectorCommandBrokerAddressAvailable.equals(Boolean.FALSE)) {
+//					Out.println(collectorCommandBrokerAddressAvailable.toString());
+//					try {
+//						collectorCommandBrokerAddressAvailable.wait();
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			}
+			while(collectorCommandBrokerAddress == null) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			Out.println("Reach here.!!!!!!!");
+			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(collectorCommandBrokerAddress);
 			Connection connection = connectionFactory.createConnection();
 			connection.start();
 			metaDataSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			                                                      
-			Topic topic = metaDataSession.createTopic("metaData");
+			Topic topic = metaDataSession.createTopic("command");
 			metaDataProducer = metaDataSession.createProducer(topic);
 			metaDataProducer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 		}
 		
-		public void sendMonitoredData() throws Exception{
+		public void sendMonitoredData() throws JMSException{
 			TextMessage metadataJsonMessage = metaDataSession.createTextMessage();
+			JsonObject metadataPackage = new JsonObject();
+			metadataPackage.addProperty("machineIPAddress", machinerIPAddress);
+			metadataPackage.addProperty("type", "metadata");
 			JsonObject assembledDynamicMetaData = assembleDynamicMetaData();
-			metadataJsonMessage.setText(assembledDynamicMetaData.toString());
+			metadataPackage.add("metadata", assembledDynamicMetaData);
+			metadataJsonMessage.setText(metadataPackage.toString());
 			
 			String correlateionID = UUID.randomUUID().toString();
 			metadataJsonMessage.setJMSCorrelationID(correlateionID);
@@ -227,12 +246,16 @@ public class Monitor {
 		@Override
 		public void run() {
 			while(true) {
-				try {
-					sendMonitoredData();
-					Thread.sleep(metaDataSendingInterval * 1000);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+					try {
+						sendMonitoredData();
+					} catch (JMSException e) {
+						System.err.println(e.getMessage());
+					}
+					try {
+						Thread.sleep(metaDataSendingInterval * 1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 			}
 		}
 	}
@@ -255,7 +278,7 @@ public class Monitor {
 			TextMessage registerCommandMessage = commandServiceSession.createTextMessage();
 			JsonObject commandJson = new JsonObject();
 			commandJson.addProperty("type", "monitor-registration");
-			commandJson.addProperty("machine-name", monitorIPAddress);
+			commandJson.addProperty("machineIPAddress", machinerIPAddress);
 			String correlateionID = UUID.randomUUID().toString();
 			registerCommandMessage.setJMSCorrelationID(correlateionID);
 			registerCommandMessage.setJMSReplyTo(this.commandServiceTemporaryQueue);
@@ -275,11 +298,10 @@ public class Monitor {
 			
 			Topic topic = session.createTopic("command");
 			MessageProducer producer = session.createProducer(topic);
-			producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+			producer.setDeliveryMode(DeliveryMode.PERSISTENT);
 			JsonObject jsonObj = new JsonObject();
 			jsonObj.addProperty("type", "monitor-enroll");
-			jsonObj.addProperty("monitorDataBrokerAddress", monitorDataBrokerAddress);
-			jsonObj.addProperty("monitorIPAddress", monitorIPAddress);
+			jsonObj.addProperty("machineIPAddress", machinerIPAddress);
 			jsonObj.add("staticMetadata", assembledStaticMetaData);
 			TextMessage enrollCommandMessage = session.createTextMessage();
 			enrollCommandMessage.setText(jsonObj.toString());
@@ -297,9 +319,15 @@ public class Monitor {
 					JsonObject jsonObj = (JsonObject)jsonParser.parse(commandJson);
 					if(jsonObj.get("type").getAsString().equals("monitor-registration-response") && 
 							jsonObj.get("value").getAsString().equals("success")) {
-						collectorCommandBrokerAddress = jsonObj.get("collectorCommandBrokerAddress").getAsString();
+						Out.println(commandJson);
+//						synchronized(collectorCommandBrokerAddressAvailable) {
+							collectorCommandBrokerAddress = jsonObj.get("collectorCommandBrokerAddress").getAsString();
+							monitorEnroll();
+//							collectorCommandBrokerAddressAvailable = true;
+//							collectorCommandBrokerAddressAvailable.notifyAll();
+//						}
 						Out.println("Intend to enroll to " + collectorCommandBrokerAddress);
-						monitorEnroll();
+						
 						Out.println("Registration successfully.");
 					}
 				} catch (JMSException e) {

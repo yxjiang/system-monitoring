@@ -3,6 +3,7 @@ package sysmon.monitor;
 import sysmon.monitor.crawler.Crawler;
 import sysmon.monitor.crawler.DummyCrawler;
 import sysmon.util.GlobalParameters;
+import sysmon.util.IPUtil;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,7 +11,7 @@ import com.google.gson.GsonBuilder;
 public class TestMonitor {
 	
 	public static void test() {
-		String managerBrokerAddress = "tcp://192.168.0.100:" + GlobalParameters.MANAGER_COMMAND_PORT;
+		String managerBrokerAddress = "tcp://" + IPUtil.getFirstAvailableIP() + ":" + GlobalParameters.MANAGER_COMMAND_PORT;
 		Monitor m = new Monitor(managerBrokerAddress);
 		for(int i = 0; i < 6; ++i) {
 			Crawler crawler = new DummyCrawler("dummy" + i);
@@ -18,20 +19,6 @@ public class TestMonitor {
 		}
 		
 		m.start();
-		
-//		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-//		
-//		while(true) {
-//			
-//			String str = gson.toJson(m.getDynamicMetaData());
-//			System.out.println(str);
-//			
-//			try {
-//				Thread.sleep(1000);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//		}
 	}
 	
 	public static void main(String[] args) {

@@ -61,7 +61,7 @@ public abstract class PassiveCommandHandler extends	CommandHandler {
 		commandServiceTopic = commandServiceSession.createTopic("command");
 		
 		commandProducer = commandServiceSession.createProducer(null);
-		commandProducer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+		commandProducer.setDeliveryMode(DeliveryMode.PERSISTENT);
 		
 		commandConsumer = commandServiceSession.createConsumer(commandServiceTopic);
 		commandConsumer.setMessageListener(this);
