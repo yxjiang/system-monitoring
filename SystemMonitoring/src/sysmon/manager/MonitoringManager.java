@@ -62,6 +62,21 @@ public class MonitoringManager {
 	}
 	
 	/**
+	 * Assign the new registered monitor to proper collector.
+	 * @param monitorName
+	 * @return
+	 */
+	private String assignCollector(String monitorName) {
+		String assignedCollectorBrokerAddress = null;
+		for(Map.Entry<String, CollectorProfile> entry : collectors.entrySet()) {
+			assignedCollectorBrokerAddress = entry.getValue().collectorBrokerAddress;
+			break;
+		}
+		Out.println("Assign [" + monitorName + "] to [" + assignedCollectorBrokerAddress + "]");
+		return assignedCollectorBrokerAddress;
+	}
+	
+	/**
 	 * The handler to receive commands for manager.
 	 *
 	 */
@@ -84,7 +99,6 @@ public class MonitoringManager {
 					TextMessage responseMessage = this.commandServiceSession.createTextMessage();
 					commandJson = ((TextMessage) commandMessage).getText();
 					JsonObject jsonObj = (JsonObject)jsonParser.parse(commandJson);
-					Out.println(commandJson);
 					//	monitor registration event
 					String eventType = jsonObj.get("type").getAsString();
 					if(eventType.equals("monitor-registration")) {
@@ -94,13 +108,8 @@ public class MonitoringManager {
 						responseJson.addProperty("value", "success");
 						
 						//	find an available collector
-						String firstCollectorCommandBrokerAddress = null;
-						for(Map.Entry<String, CollectorProfile> entry : collectors.entrySet()) {
-							firstCollectorCommandBrokerAddress = entry.getValue().collectorBrokerAddress;
-							break;
-						}
-						Out.println("Assign " + monitorName + " to " + firstCollectorCommandBrokerAddress);
-						responseJson.addProperty("collectorCommandBrokerAddress", firstCollectorCommandBrokerAddress);
+						String assignedCollectorBrokerAddress = assignCollector(monitorName);
+						responseJson.addProperty("collectorCommandBrokerAddress", assignedCollectorBrokerAddress);
 						responseMessage.setJMSCorrelationID(commandMessage.getJMSCorrelationID());
 						responseMessage.setText(responseJson.toString());
 						this.commandProducer.send(commandMessage.getJMSReplyTo(), responseMessage);

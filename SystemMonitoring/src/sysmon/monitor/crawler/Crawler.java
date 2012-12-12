@@ -1,5 +1,7 @@
 package sysmon.monitor.crawler;
 
+import org.hyperic.sigar.Sigar;
+
 import com.google.gson.JsonObject;
 
 /**

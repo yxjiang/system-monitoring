@@ -309,12 +309,14 @@ public class Monitor {
 	}
 	
 	public static void main(String[] args) {
-		if(args.length < 2) {
+		if(args.length < 1) {
 			System.out.println("usage: monitor manager-IP");
+			System.out.println("\tmanager-ip\tThe IP address of manager.");
 			System.exit(1);
 		}
-		String managerBrokerAddress = "tcp://" + args[1] + ":" + GlobalParameters.MANAGER_COMMAND_PORT;
+		String managerBrokerAddress = "tcp://" + args[0] + ":" + GlobalParameters.MANAGER_COMMAND_PORT;
 		Monitor m = new Monitor(managerBrokerAddress);
+		m.start();
 	}
 	
 	

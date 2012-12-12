@@ -171,17 +171,17 @@ public class Collector {
 	}
 	
 	public static void main(String[] args) {
-		if (args.length < 2) {
+		if (args.length < 1) {
 			System.out.println("usage: collector manager-ip [time-window]");
 			System.out.println("\tmanager-ip\tThe IP address of manager.");
 			System.out.println("\ttime-window\tThe time length in seconds cached.");
 			System.exit(1);
 		}
-		String managerBrokerAddress = "tcp://" + args[1] + ":" + GlobalParameters.MANAGER_COMMAND_PORT;
+		String managerBrokerAddress = "tcp://" + args[0] + ":" + GlobalParameters.MANAGER_COMMAND_PORT;
 		int capacity = 0;
-		if(args.length >= 3) {
+		if(args.length >= 2) {
 			try{
-				capacity = Integer.parseInt(args[2]);
+				capacity = Integer.parseInt(args[1]);
 			} catch(NumberFormatException e) {
 				capacity = 60;
 			}
@@ -191,6 +191,7 @@ public class Collector {
 		}
 				
 		Collector c = new Collector(managerBrokerAddress, capacity);
+		c.start();
 	}
 
 }
