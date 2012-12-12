@@ -131,4 +131,8 @@ public class MonitoringManager {
 		
 	}
 	
+	public static void main(String[] args) {
+		MonitoringManager manager = MonitoringManager.getInstance();
+	}
+	
 }

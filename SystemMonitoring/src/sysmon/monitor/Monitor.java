@@ -173,12 +173,10 @@ public class Monitor {
 	 */
 	class MetadataMessageSender implements Runnable{
 		
-//		private BrokerService broker;
 		private MessageProducer metaDataProducer;
 		private Session metaDataSession;
 		
 		public MetadataMessageSender() {
-//			createBroker();
 			try {
 				initMetaDataStreamService();
 			} catch (JMSException e) {
@@ -186,31 +184,8 @@ public class Monitor {
 			}
 		}
 		
-//		private void createBroker() {
-//			broker = new BrokerService();
-//			broker.setBrokerName("testBroker");
-//			try {
-//				broker.setPersistent(false);
-//				broker.setUseJmx(false);
-//				broker.addConnector(collectorCommandBrokerAddress);
-//				broker.start();
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
-		
 		public void initMetaDataStreamService() throws JMSException {
 			//	wait for collector broker address available
-//			synchronized(collectorCommandBrokerAddressAvailable) {
-//				while(collectorCommandBrokerAddressAvailable.equals(Boolean.FALSE)) {
-//					Out.println(collectorCommandBrokerAddressAvailable.toString());
-//					try {
-//						collectorCommandBrokerAddressAvailable.wait();
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					}
-//				}
-//			}
 			while(collectorCommandBrokerAddress == null) {
 				try {
 					Thread.sleep(1000);
@@ -218,7 +193,6 @@ public class Monitor {
 					e.printStackTrace();
 				}
 			}
-			Out.println("Reach here.!!!!!!!");
 			ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(collectorCommandBrokerAddress);
 			Connection connection = connectionFactory.createConnection();
 			connection.start();
@@ -320,14 +294,9 @@ public class Monitor {
 					if(jsonObj.get("type").getAsString().equals("monitor-registration-response") && 
 							jsonObj.get("value").getAsString().equals("success")) {
 						Out.println(commandJson);
-//						synchronized(collectorCommandBrokerAddressAvailable) {
-							collectorCommandBrokerAddress = jsonObj.get("collectorCommandBrokerAddress").getAsString();
-							monitorEnroll();
-//							collectorCommandBrokerAddressAvailable = true;
-//							collectorCommandBrokerAddressAvailable.notifyAll();
-//						}
+						collectorCommandBrokerAddress = jsonObj.get("collectorCommandBrokerAddress").getAsString();
 						Out.println("Intend to enroll to " + collectorCommandBrokerAddress);
-						
+						monitorEnroll();
 						Out.println("Registration successfully.");
 					}
 				} catch (JMSException e) {
@@ -337,6 +306,10 @@ public class Monitor {
 			}
 		}
 
+	}
+	
+	public static void main(String[] args) {
+		System.out.println("Monitor.");
 	}
 	
 	
