@@ -1,0 +1,69 @@
+<project name="SystemMonitoring">
+	<property name="src" value="src" />
+	<property name="classes" value="build/classes" />
+	<property name="manager-jar" value="manager.jar" />
+	<property name="collector-jar" value="collector.jar" />
+	<property name="monitor-jar" value="monitor.jar" />
+	<path id="project.libs">
+		<fileset dir="lib">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+	<!-- Concatenate lib jars to make manifest -->
+	<pathconvert property="lib" pathsep=" ">
+		<mapper>
+			<chainedmapper>
+				<flattenmapper />
+				<globmapper from="*" to="lib/*" />
+			</chainedmapper>
+		</mapper>
+		<fileset dir="lib">
+			<include name="*.jar" />
+		</fileset>
+	</pathconvert>
+	<property name="libs" value="${lib}" />
+	<echo>${libs}</echo>
+	<target name="init">
+		<mkdir dir="${classes}" />
+	</target>
+	<!--	build manager	-->
+	<target name="compile-manager" depends="init">
+		<javac srcdir="${src}" destdir="${classes}">
+			<classpath refid="project.libs">
+			</classpath>
+		</javac>
+	</target>
+	<target name="manager" depends="compile-manager" description="make manager.jar file">
+		<jar jarfile="${manager-jar}" basedir="${classes}">
+			<manifest>
+				<attribute name="Main-Class" value="sysmon.manager.MonitoringManager" />
+				<attribute name="Class-Path" value="${libs}">
+				</attribute>
+			</manifest>
+		</jar>
+	</target>
+
+	<!--	build collector	-->
+	<target name="compile-collector" depends="init">
+		<javac srcdir="${src}" destdir="${classes}">
+			<classpath refid="project.libs">
+			</classpath>
+		</javac>
+	</target>
+	<target name="collector" depends="compile-collector" description="make collector.jar file">
+		<jar jarfile="${collector-jar}" basedir="${classes}">
+			<manifest>
+				<attribute name="Main-Class" value="sysmon.manager.Collector" />
+				<attribute name="Class-Path" value="${libs}">
+				</attribute>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="clean">
+		<delete dir="${classes}" />
+		<delete file="${manager-jar}" />
+		<delete file="${collector-jar}" />
+		<delete file="${monitor-jar}" />
+	</target>
+</project>
