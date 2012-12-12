@@ -27,13 +27,13 @@ public class DummyCrawler extends Crawler{
 	@Override
 	protected void fetchDynamicMetaDataHelper(JsonObject newDynamicMetaData) {
 		//	open a file and then close
-		File file = new File("/home/yxjiang/.vimrc");
+		File file = new File("~/.vimrc");
 		file.canRead();
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(file));
 			br.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			System.err.println("Dummy file not exists.");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

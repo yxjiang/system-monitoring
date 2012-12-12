@@ -44,9 +44,8 @@ public class IPUtil {
 				continue;
 			
 			String interfaceName = currentInterface.toString().split(":")[1];
-			if(false == (interfaceName.startsWith("lo") || interfaceName.startsWith("wlan")))
+			if(false == (interfaceName.startsWith("eth") || interfaceName.startsWith("wlan")))
 				continue;
-			
 			Enumeration<InetAddress> addresses = currentInterface.getInetAddresses();
 			while (addresses.hasMoreElements()) {
 				InetAddress current_addr = addresses.nextElement();

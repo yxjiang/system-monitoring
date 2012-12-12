@@ -170,5 +170,15 @@ public class Collector {
 		}
 	}
 	
+	public static void main(String[] args) {
+		if (args.length < 2) {
+			System.out.println("usage: collector manager-ip [time-window]");
+			System.out.println("\tmanager-ip\tThe IP address of manager.");
+			System.out.println("\ttime-window\tThe time length in seconds cached.");
+		}
+		String managerBrokerAddress = "tcp://" + args[1] + ":" + GlobalParameters.MANAGER_COMMAND_PORT;
+		int capacity = 60;
+		Collector c = new Collector(managerBrokerAddress, capacity);
+	}
 
 }
