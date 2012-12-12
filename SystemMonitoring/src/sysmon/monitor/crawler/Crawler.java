@@ -14,11 +14,13 @@ public abstract class Crawler{
 	protected String crawlerName;
 	protected JsonObject staticMetaData;
 	protected JsonObject dynamicMetaData;
+	protected Sigar sigar;
 	
 	public Crawler(String crawlerName) {
 		this.crawlerName = crawlerName;
 		this.staticMetaData = new JsonObject();
 		this.dynamicMetaData = new JsonObject();
+		this.sigar = new Sigar();
 		updateStaticMetaData();
 		updateDynamicMetaData();
 	}

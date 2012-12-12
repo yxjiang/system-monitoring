@@ -9,11 +9,10 @@ import com.google.gson.JsonObject;
 public class CPUCrawler extends Crawler{
 	
 	private final static String cpuStaticInfoFile = "/proc/cpuinfo";
-	private Sigar sigar;
+	
 
 	public CPUCrawler(String crawlerName) {
 		super(crawlerName);
-		this.sigar = new Sigar();
 	}
 
 	@Override
@@ -24,12 +23,15 @@ public class CPUCrawler extends Crawler{
 	@Override
 	protected void updateStaticMetaData() {
 		JsonObject staticMetaDataJson = new JsonObject();
-//		try {
-//			sigar.getCpuInfoList();
-//			
-//		} catch (SigarException e) {
-//			e.printStackTrace();
-//		}
+		try {
+			CpuInfo[] cpuinfo = sigar.getCpuInfoList();
+			for(CpuInfo info : cpuinfo) {
+				System.out.println(info.getTotalCores());
+			}
+			
+		} catch (SigarException e) {
+			e.printStackTrace();
+		}
 		
 		
 		this.staticMetaData = staticMetaDataJson;
@@ -47,7 +49,7 @@ public class CPUCrawler extends Crawler{
 	
 	public static void main(String[] args) {
 		CPUCrawler c = new CPUCrawler("cpu");
-		c.test();
+//		c.test();
 	}
 
 }
