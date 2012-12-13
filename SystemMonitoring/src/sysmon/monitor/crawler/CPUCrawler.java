@@ -1,7 +1,7 @@
 package sysmon.monitor.crawler;
 
 import org.hyperic.sigar.CpuInfo;
-import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.SigarException;
 
 import com.google.gson.JsonObject;
@@ -24,32 +24,34 @@ public class CPUCrawler extends Crawler{
 	protected void updateStaticMetaData() {
 		JsonObject staticMetaDataJson = new JsonObject();
 		try {
-			CpuInfo[] cpuinfo = sigar.getCpuInfoList();
-			for(CpuInfo info : cpuinfo) {
-				System.out.println(info.getTotalCores());
-			}
-			
+			CpuInfo[] cpuInfos = sigar.getCpuInfoList();
+			CpuInfo firstCPU = cpuInfos[0];
+			staticMetaDataJson.addProperty("total-cores", firstCPU.getTotalCores());
+			staticMetaDataJson.addProperty("vendor", firstCPU.getVendor());
+			staticMetaDataJson.addProperty("model", firstCPU.getModel());
+			staticMetaDataJson.addProperty("Mhz", firstCPU.getMhz());
 		} catch (SigarException e) {
 			e.printStackTrace();
 		}
-		
 		
 		this.staticMetaData = staticMetaDataJson;
 	}
 
 	@Override
 	protected void fetchDynamicMetaDataHelper(JsonObject newMetaData) {
-		
+		try {
+			CpuPerc[] cpuPercs = sigar.getCpuPercList();
+			for(int i = 0; i < cpuPercs.length; ++i) {
+				JsonObject singleCpu = new JsonObject();
+				singleCpu.addProperty("user-time", cpuPercs[i].getUser());
+				singleCpu.addProperty("sys-time", cpuPercs[i].getSys());
+				singleCpu.addProperty("combined-time", cpuPercs[i].getCombined());
+				singleCpu.addProperty("idle-time", cpuPercs[i].getIdle());
+				newMetaData.add("core-" + i, singleCpu);
+			}
+		} catch (SigarException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public void test() {
-		updateStaticMetaData();
-		System.out.println(this.staticMetaData.toString());
-	}
-	
-	public static void main(String[] args) {
-		CPUCrawler c = new CPUCrawler("cpu");
-//		c.test();
-	}
-
 }

@@ -1,5 +1,7 @@
 <project name="SystemMonitoring" default="all">
+	<property name="platform" value="amd64-linux" />
 	<property name="src" value="src" />
+	<property name="lib-path" value="lib" />
 	<property name="build-dest" value="build" />
 	<property name="classes" value="build/classes" />
 	<property name="manager-jar" value="manager.jar" />
@@ -100,6 +102,8 @@
 			<fileset dir="lib">
 			</fileset>
 		</copy>
+		<echo>Copy the sigar native library</echo>
+		<copy file="${lib-path}/libsigar-amd64-linux.so" todir="${monitor-dest}" />
 	</target>
 	
 	<target name="clean">

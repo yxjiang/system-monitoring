@@ -15,9 +15,9 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.broker.BrokerService;
 
 import sysmon.common.InitiativeCommandHandler;
+import sysmon.monitor.crawler.CPUCrawler;
 import sysmon.monitor.crawler.Crawler;
 import sysmon.util.GlobalParameters;
 import sysmon.util.IPUtil;
@@ -316,6 +316,8 @@ public class Monitor {
 		}
 		String managerBrokerAddress = "tcp://" + args[0] + ":" + GlobalParameters.MANAGER_COMMAND_PORT;
 		Monitor m = new Monitor(managerBrokerAddress);
+		Crawler cpuCrawler = new CPUCrawler("cpu");
+		m.addCrawler(cpuCrawler);
 		m.start();
 	}
 	
