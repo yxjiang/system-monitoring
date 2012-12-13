@@ -7,15 +7,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-public class TestCPUCrawler {
-	
+public class TestMemoryCrawler {
+
 	private Gson gson;
 	private Crawler c;
 	
 	@Before
 	public void init() {
 		gson = new GsonBuilder().setPrettyPrinting().create();
-		c = new CPUCrawler("cpu");
+		c = new MemoryCrawler("mem");
 	}
 	
 	@Test
@@ -29,5 +29,4 @@ public class TestCPUCrawler {
 		JsonObject dynamicJson = c.getDynamicMetaData();
 		System.out.println(gson.toJson(dynamicJson));
 	}
-	
 }

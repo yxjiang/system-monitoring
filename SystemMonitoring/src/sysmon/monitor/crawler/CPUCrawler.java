@@ -8,9 +8,6 @@ import com.google.gson.JsonObject;
 
 public class CPUCrawler extends Crawler{
 	
-	private final static String cpuStaticInfoFile = "/proc/cpuinfo";
-	
-
 	public CPUCrawler(String crawlerName) {
 		super(crawlerName);
 	}
@@ -22,19 +19,16 @@ public class CPUCrawler extends Crawler{
 
 	@Override
 	protected void updateStaticMetaData() {
-		JsonObject staticMetaDataJson = new JsonObject();
 		try {
 			CpuInfo[] cpuInfos = sigar.getCpuInfoList();
 			CpuInfo firstCPU = cpuInfos[0];
-			staticMetaDataJson.addProperty("total-cores", firstCPU.getTotalCores());
-			staticMetaDataJson.addProperty("vendor", firstCPU.getVendor());
-			staticMetaDataJson.addProperty("model", firstCPU.getModel());
-			staticMetaDataJson.addProperty("Mhz", firstCPU.getMhz());
+			this.staticMetaData.addProperty("total-cores", firstCPU.getTotalCores());
+			this.staticMetaData.addProperty("vendor", firstCPU.getVendor());
+			this.staticMetaData.addProperty("model", firstCPU.getModel());
+			this.staticMetaData.addProperty("Mhz", firstCPU.getMhz());
 		} catch (SigarException e) {
 			e.printStackTrace();
 		}
-		
-		this.staticMetaData = staticMetaDataJson;
 	}
 
 	@Override
