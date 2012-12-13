@@ -2,7 +2,7 @@ package sysmon.monitor.crawler;
 
 import org.junit.Test;
 
-public class TestDummyCrawler {
+public class TestDummyCrawler{
 
 	@Test
 	public void testDummyCrawler() {

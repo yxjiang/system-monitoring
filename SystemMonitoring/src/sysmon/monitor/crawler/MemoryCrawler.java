@@ -9,6 +9,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+/**
+ * Crawl the information about system memory.
+ * @author yexijiang
+ *
+ */
 public class MemoryCrawler extends Crawler {
 
 	private Mem mem;

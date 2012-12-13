@@ -6,6 +6,12 @@ import org.hyperic.sigar.SigarException;
 
 import com.google.gson.JsonObject;
 
+
+/**
+ * Crawl the information about system CPU.
+ * @author yexijiang
+ *
+ */
 public class CPUCrawler extends Crawler{
 	
 	public CPUCrawler(String crawlerName) {
