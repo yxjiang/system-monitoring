@@ -18,7 +18,7 @@ public class TestThreadSafeMetadataBuffer {
 	
 	@Before
 	public void init() {
-		buffer = new ThreadSafeMetadataBuffer(6);
+		buffer = new ThreadSafeMetadataBuffer(600);
 	}
 
 	@Ignore
