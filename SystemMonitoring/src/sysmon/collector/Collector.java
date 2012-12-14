@@ -70,7 +70,7 @@ public class Collector {
 //		public String monitorCommandBrokerAddress;
 		public String staticMetadata;
 		public long secondSinceLastAccess;
-		public MetadataBuffer<JsonObject> metadataBuffer;
+		public MetadataBuffer metadataBuffer;
 		
 		public MonitorProfile(String monitorIPAddress, String staticMetadata) {
 			super();
@@ -78,7 +78,7 @@ public class Collector {
 //			this.monitorCommandBrokerAddress = monitorCommandBrokerAddress;
 			this.staticMetadata = staticMetadata;
 			this.secondSinceLastAccess = 0;
-			this.metadataBuffer = new ThreadSafeMetadataBuffer<JsonObject>(metadataStreamCapacity);
+			this.metadataBuffer = new ThreadSafeMetadataBuffer(metadataStreamCapacity);
 		}
 		
 	}

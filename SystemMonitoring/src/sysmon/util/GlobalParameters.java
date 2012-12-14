@@ -11,6 +11,7 @@ public class GlobalParameters {
 	public final static String COLLECTOR_COMMAND_PORT = "32098";
 	public final static String MONITOR_COMMAND_PORT = "32099";
 
-	
+	public final static String EMBEDDED_DB_USERNAME = "admin";
+	public final static String EMBEDDED_DB_PASSWORD = "admin";
 
 }
