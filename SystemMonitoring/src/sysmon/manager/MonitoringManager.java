@@ -1,7 +1,9 @@
 package sysmon.manager;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -26,7 +28,7 @@ public class MonitoringManager {
 	private static MonitoringManager instance;
 	
 	private ManagerPassiveCommandHandler passiveCommandHandler;
-	private Map<String, CollectorProfile> collectors;
+	private Map<String, CollectorProfile> collectorsProfile;
 	
 	/**
 	 * Get the singleton of monitoring manager.
@@ -40,7 +42,7 @@ public class MonitoringManager {
 	}
 	
 	private MonitoringManager() {
-		this.collectors = new HashMap<String, CollectorProfile>();
+		this.collectorsProfile = new HashMap<String, CollectorProfile>();
 		this.passiveCommandHandler = new ManagerPassiveCommandHandler(GlobalParameters.MANAGER_COMMAND_PORT);
 	}
 	
@@ -52,28 +54,43 @@ public class MonitoringManager {
 		public String collectorIPAddress;
 		public String collectorBrokerAddress;
 		public long secondSinceLastConnected;
+		public Set<String> monitorSet;
+		
 		public CollectorProfile(String collectorIPAddress,
 				String collectorBrokerAddress) {
 			super();
 			this.collectorIPAddress = collectorIPAddress;
 			this.collectorBrokerAddress = collectorBrokerAddress;
 			this.secondSinceLastConnected = 0;
+			this.monitorSet = new HashSet<String>();
 		}
+		
 	}
 	
 	/**
-	 * Assign the new registered monitor to proper collector.
+	 * Assign the new registered monitor to collector with least load.
 	 * @param monitorName
 	 * @return
 	 */
 	private String assignCollector(String monitorName) {
-		String assignedCollectorBrokerAddress = null;
-		for(Map.Entry<String, CollectorProfile> entry : collectors.entrySet()) {
-			assignedCollectorBrokerAddress = entry.getValue().collectorBrokerAddress;
-			break;
+		String assignedCollector = null;
+		CollectorProfile assignedCollectorProfile = null;
+		int leastLoad = Integer.MAX_VALUE;
+		
+		for(Map.Entry<String, CollectorProfile> entry : collectorsProfile.entrySet()) {
+			int collectorLoad = entry.getValue().monitorSet.size();
+			if(collectorLoad < leastLoad) {
+				assignedCollector = entry.getKey();
+				assignedCollectorProfile = entry.getValue();
+				leastLoad = collectorLoad;
+			}
+			if(collectorLoad == 0)
+				break;
 		}
-		Out.println("Assign [" + monitorName + "] to [" + assignedCollectorBrokerAddress + "]");
-		return assignedCollectorBrokerAddress;
+		assignedCollectorProfile.monitorSet.add(monitorName);
+		collectorsProfile.put(assignedCollector, assignedCollectorProfile);
+		Out.println("Assign [" + monitorName + "] to [" + assignedCollectorProfile.collectorBrokerAddress + "]");
+		return assignedCollectorProfile.collectorBrokerAddress;
 	}
 	
 	/**
@@ -122,7 +139,7 @@ public class MonitoringManager {
 						String collectorIPAddress = jsonObj.get("collectorIPAddress").getAsString();
 						String collectorBrokerAddress = jsonObj.get("collectorBrokerAddress").getAsString();
 						CollectorProfile profile = new CollectorProfile(collectorIPAddress, collectorBrokerAddress);
-						collectors.put(collectorIPAddress, profile);
+						collectorsProfile.put(collectorIPAddress, profile);
 						JsonObject responseJson = new JsonObject();
 						responseJson.addProperty("type", "collector-registration-response");
 						responseJson.addProperty("value", "success");
