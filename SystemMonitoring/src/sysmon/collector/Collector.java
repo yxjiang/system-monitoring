@@ -201,12 +201,15 @@ public class Collector {
 		public void run() {
 			String avgCoreIdle = "select machineIP, avg(cpu.cores[0].idleTime) as avg from MachineMetadata.win:length(10) where machineIP = '192.168.0.103'";
 			EPStatement statement = cepService.getEPAdministrator().createEPL(avgCoreIdle);
+//			String pattern = "select avg(a.cpu.cores[0].idleTime) from pattern [every a=MachineMetadata(cpu.cores[0].idleTime < 0.3)].win:length(10)";
+//			EPStatement statement = cepService.getEPAdministrator().createEPL(pattern);
 			statement.addListener(new UpdateListener() {
 				@Override
 				public void update(EventBean[] newEvents, EventBean[] oldEvents) {
 					EventBean event = newEvents[0];
+//					System.out.println(event.get("avg"));
 					if(Double.parseDouble(event.get("avg").toString()) < 0.3)
-						System.out.println("Machine [" + event.get("machineIP") + "], CPU is busy:" + event.get("avg"));
+						System.out.println("Machine [" + event.get("machineIP") + "], CPU is busy. Idle time:" + event.get("avg") + "%");
 				}
 				
 			});
