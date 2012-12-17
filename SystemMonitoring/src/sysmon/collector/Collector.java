@@ -199,7 +199,7 @@ public class Collector {
 
 		@Override
 		public void run() {
-			String avgCoreIdle = "select machineIP, avg(cpu.cores[0].idleTime) as avg from MachineMetadata.win:length(10)";
+			String avgCoreIdle = "select machineIP, avg(cpu.cores[0].idleTime) as avg from MachineMetadata.win:length(10) where machineIP = '192.168.0.103'";
 			EPStatement statement = cepService.getEPAdministrator().createEPL(avgCoreIdle);
 			statement.addListener(new UpdateListener() {
 				@Override
