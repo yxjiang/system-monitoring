@@ -9,6 +9,7 @@ import javax.jms.Message;
 import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
 
+import sysmon.collector.alert.CpuUsageAlert;
 import sysmon.common.InitiativeCommandHandler;
 import sysmon.common.MetadataBuffer;
 import sysmon.common.PassiveCommandHandler;
@@ -21,9 +22,6 @@ import sysmon.util.Out;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.UpdateListener;
 import com.google.gson.JsonObject;
 
 /**
@@ -200,16 +198,7 @@ public class Collector {
 		@Override
 		public void run() {
 			String avgCoreIdle = "select machineIP, avg(cpu.idleTime) as avg from MachineMetadata.win:length(10) group by machineIP";
-			EPStatement statement = cepService.getEPAdministrator().createEPL(avgCoreIdle);
-			statement.addListener(new UpdateListener() {
-				@Override
-				public void update(EventBean[] newEvents, EventBean[] oldEvents) {
-					EventBean event = newEvents[0];
-					if(Double.parseDouble(event.get("avg").toString()) < 0.3)
-						System.out.println("Machine [" + event.get("machineIP") + "], CPU is busy. Idle time:" + event.get("avg") + "%");
-				}
-				
-			});
+			new CpuUsageAlert(cepService);
 		}
 	}
 	
