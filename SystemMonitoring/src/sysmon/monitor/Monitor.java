@@ -10,6 +10,7 @@ import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
@@ -17,6 +18,8 @@ import javax.jms.Topic;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import sysmon.common.InitiativeCommandHandler;
+import sysmon.common.metadata.CpuMetadata;
+import sysmon.common.metadata.MachineMetadata;
 import sysmon.monitor.crawler.CPUCrawler;
 import sysmon.monitor.crawler.Crawler;
 import sysmon.util.GlobalParameters;
@@ -133,6 +136,20 @@ public class Monitor {
 		return newAssembledMetaData;
 	}
 	
+	public MachineMetadata assembleObject() {
+		Date newDate = new Date();
+		MachineMetadata machineMetadata = new MachineMetadata(newDate.getTime() / 1000, this.machinerIPAddress);
+		
+		for(Map.Entry<String, CrawlerWorker> entry : crawlers.entrySet()) {
+			Object metadataObject = entry.getValue().getCrawler().getMetadataObject();
+			if(metadataObject instanceof CpuMetadata) {
+				machineMetadata.setCpu((CpuMetadata)metadataObject);
+			}
+		}
+		
+		return machineMetadata;
+	}
+	
 	
 	/**
 	 * MonitorWork continuously fetch the dynamic metadata using a specified Crawler.
@@ -212,9 +229,15 @@ public class Monitor {
 			metadataPackage.add("metadata", assembledDynamicMetaData);
 			metadataJsonMessage.setText(metadataPackage.toString());
 			
+			ObjectMessage metadataObjMessage = metaDataSession.createObjectMessage();
+			metadataObjMessage.setObject(assembleObject());
+			
 			String correlateionID = UUID.randomUUID().toString();
 			metadataJsonMessage.setJMSCorrelationID(correlateionID);
-			this.metaDataProducer.send(metadataJsonMessage);
+			metadataObjMessage.setJMSCorrelationID(correlateionID);
+//			this.metaDataProducer.send(metadataJsonMessage);
+			this.metaDataProducer.send(metadataObjMessage);
+			
 		}
 		
 		@Override
@@ -223,7 +246,9 @@ public class Monitor {
 					try {
 						sendMonitoredData();
 					} catch (JMSException e) {
-						System.err.println(e.getMessage());
+						if(e.getMessage().equals("The Session is closed")) {
+							Out.println("Cannot connect to collector [" + collectorCommandBrokerAddress + "]");
+						}
 					}
 					try {
 						Thread.sleep(metaDataSendingInterval * 1000);

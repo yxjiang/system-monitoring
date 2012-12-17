@@ -51,10 +51,10 @@ public class TestThreadSafeMetadataBuffer {
 			testJson.add("cpu", cpuJson);
 			testJson.add("memory", memoryJson);
 			buffer.insert(testJson.toString());
-			String queryStmt = "select count(*) from MachineData";
+			String queryStmt = "select * from MachineData order by timestamp";
 			buffer.query(queryStmt);
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(900);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

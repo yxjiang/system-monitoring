@@ -9,12 +9,13 @@ import com.google.gson.JsonObject;
  * @author Yexi Jiang (http://users.cs.fiu.edu/~yjian004)
  *
  */
-public abstract class Crawler{
+public abstract class Crawler<T>{
 	
 	protected String crawlerName;
 	protected JsonObject staticMetaData;
 	protected JsonObject dynamicMetaData;
 	protected Sigar sigar;
+	protected T metadataObject;
 	
 	public Crawler(String crawlerName) {
 		this.crawlerName = crawlerName;
@@ -50,7 +51,7 @@ public abstract class Crawler{
 	}
 	
 	/**
-	 * Update the dynamic meta data.
+	 * Update the dynamic meta data, also keep the object version copy.
 	 */
 	protected abstract void fetchDynamicMetaDataHelper(JsonObject newMetaData);
 	
@@ -62,5 +63,13 @@ public abstract class Crawler{
 		synchronized(dynamicMetaData	) {
 			return this.dynamicMetaData;
 		}
+	}
+	
+	/**
+	 * Return the meta data in POJO format.
+	 * @return
+	 */
+	public T getMetadataObject() {
+		return metadataObject;
 	}
 }

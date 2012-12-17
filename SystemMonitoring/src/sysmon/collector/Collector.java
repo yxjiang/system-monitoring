@@ -4,28 +4,27 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
-import javax.jms.Session;
+import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
-import javax.jms.Topic;
-
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.broker.BrokerService;
 
 import sysmon.common.InitiativeCommandHandler;
 import sysmon.common.MetadataBuffer;
 import sysmon.common.PassiveCommandHandler;
 import sysmon.common.ThreadSafeMetadataBuffer;
+import sysmon.common.metadata.MachineMetadata;
 import sysmon.util.GlobalParameters;
 import sysmon.util.IPUtil;
 import sysmon.util.Out;
 
+import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.UpdateListener;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 /**
  * The collector collects the metadata sent by the assigned monitors.
@@ -42,6 +41,7 @@ public class Collector {
 	private Map<String, MonitorProfile> monitorsAddresses;
 	private CollectorCommandSender commandSender;
 	private CollectorCommandReceiver commandReceiver;
+	private CEPStream cepStream;
 	
 	public Collector(String managerBrokerAddress, int capacity) {
 		this.metadataStreamCapacity = capacity;
@@ -51,11 +51,14 @@ public class Collector {
 		this.monitorsAddresses = new HashMap<String, MonitorProfile>();
 		this.commandSender = new CollectorCommandSender(this.managerBrokerAddress);
 		this.commandReceiver = new CollectorCommandReceiver(GlobalParameters.COLLECTOR_COMMAND_PORT);
+		this.cepStream = new CEPStream();
 	}
 	
 	public void start() {
 		try {
 			commandSender.registerToManager();
+			Thread cepThread = new Thread(cepStream);
+			cepThread.start();
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
@@ -118,6 +121,15 @@ public class Collector {
 					e.printStackTrace();
 				}
 			}
+			else if(commandMessage instanceof ObjectMessage) {	//	receive metadata
+				ObjectMessage objMessage = (ObjectMessage)commandMessage;
+				try {
+					MachineMetadata machineMetadata = (MachineMetadata)objMessage.getObject();
+					cepStream.cepService.getEPRuntime().sendEvent(machineMetadata);
+				} catch (JMSException e) {
+					e.printStackTrace();
+				}
+			}
 
 		}
 		
@@ -172,6 +184,35 @@ public class Collector {
 		}
 	}
 	
+	/**
+	 * Complex stream handler.
+	 *
+	 */
+	class CEPStream implements Runnable{
+		private EPServiceProvider cepService;
+		
+		public CEPStream() {
+			Configuration config = new Configuration();
+			config.addEventTypeAutoName("sysmon.common.metadata");
+			cepService = EPServiceProviderManager.getDefaultProvider(config);
+		}
+
+		@Override
+		public void run() {
+			String avgCoreIdle = "select machineIP, avg(cpu.cores[0].idleTime) as avg from MachineMetadata.win:length(10)";
+			EPStatement statement = cepService.getEPAdministrator().createEPL(avgCoreIdle);
+			statement.addListener(new UpdateListener() {
+				@Override
+				public void update(EventBean[] newEvents, EventBean[] oldEvents) {
+					EventBean event = newEvents[0];
+					if(Double.parseDouble(event.get("avg").toString()) < 0.3)
+						System.out.println("Machine [" + event.get("machineIP") + "], CPU is busy:" + event.get("avg"));
+				}
+				
+			});
+		}
+	}
+	
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println("usage: collector manager-ip [time-window]");
@@ -195,5 +236,5 @@ public class Collector {
 		Collector c = new Collector(managerBrokerAddress, capacity);
 		c.start();
 	}
-
+	
 }

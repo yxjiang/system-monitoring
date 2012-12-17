@@ -4,6 +4,9 @@ import org.hyperic.sigar.CpuInfo;
 import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.SigarException;
 
+import sysmon.common.metadata.CpuMetadata;
+import sysmon.common.metadata.CpuMetadata.Core;
+
 import com.google.gson.JsonObject;
 
 
@@ -12,7 +15,7 @@ import com.google.gson.JsonObject;
  * @author yexijiang
  *
  */
-public class CPUCrawler extends Crawler{
+public class CPUCrawler extends Crawler<CpuMetadata>{
 	
 	public CPUCrawler(String crawlerName) {
 		super(crawlerName);
@@ -41,14 +44,26 @@ public class CPUCrawler extends Crawler{
 	protected void fetchDynamicMetaDataHelper(JsonObject newMetaData) {
 		try {
 			CpuPerc[] cpuPercs = sigar.getCpuPercList();
+			CpuMetadata.Core[] cores = new CpuMetadata.Core[cpuPercs.length];
 			for(int i = 0; i < cpuPercs.length; ++i) {
 				JsonObject singleCpu = new JsonObject();
-				singleCpu.addProperty("user-time", cpuPercs[i].getUser());
-				singleCpu.addProperty("sys-time", cpuPercs[i].getSys());
-				singleCpu.addProperty("combined-time", cpuPercs[i].getCombined());
-				singleCpu.addProperty("idle-time", cpuPercs[i].getIdle());
+				double userTime = cpuPercs[i].getUser();
+				userTime = userTime < 1.0 ? userTime : 1.0; 
+				double sysTime = cpuPercs[i].getSys();
+				sysTime = sysTime < 1.0 ? sysTime : 1.0;
+				double combinedTime = cpuPercs[i].getCombined();
+				combinedTime = combinedTime < 1.0 ? combinedTime : 1.0;
+				double idleTime = cpuPercs[i].getIdle();
+				idleTime = idleTime < 1.0 ? idleTime : 1.0;
+				singleCpu.addProperty("user-time", userTime);
+				singleCpu.addProperty("sys-time", sysTime);
+				singleCpu.addProperty("combined-time", combinedTime);
+				singleCpu.addProperty("idle-time", idleTime);
 				newMetaData.add("core-" + i, singleCpu);
+				
+				cores[i] = new CpuMetadata.Core(userTime, sysTime, combinedTime, idleTime);
 			}
+			this.metadataObject = new CpuMetadata("cpu", cores);
 		} catch (SigarException e) {
 			e.printStackTrace();
 		}

@@ -20,6 +20,9 @@ public class ThreadSafeMetadataBuffer extends MetadataBuffer {
 	private String dbUrl = "local:/tmp/db/monitoring";
 	private ODatabaseDocumentTx db;
 	
+	
+	private int removed = 0;
+	
 	public ThreadSafeMetadataBuffer(int capacity) {
 		super(capacity);
 		try {
@@ -35,24 +38,57 @@ public class ThreadSafeMetadataBuffer extends MetadataBuffer {
 		ODocument machineData = new ODocument("MachineData");
 		machineData.fromJSON(element);
 		Integer timestamp = machineData.field("timestamp");
-
-		db.begin();
+		List<ODocument> result = db.query(new OSQLSynchQuery<ODocument>("select max(timestamp) as max from MachineData"));
+		
+		//	eliminate duplicate records
+		if(!result.isEmpty()) {
+			Object max = result.get(0).field("max");
+			if(max != null) {
+				int maxInt = Integer.parseInt(max.toString()); 
+				if(maxInt >= timestamp) {
+					++removed;
+					return;
+				}
+			}
+		}
+		
+		machineData.save();
 		for(ODocument data : db.browseClass("MachineData")) {
 			Integer dataTimestamp = data.field("timestamp");
 			if(timestamp - dataTimestamp >= capacity) {
 				data.delete();
 			}
 		}
-		machineData.save();
-		db.commit();
+		
 	}
 	
 	@Override
 	public void query(String queryStmt) {
 		List<ODocument> result = db.query(new OSQLSynchQuery<ODocument>(queryStmt));
-		for(ODocument document : result) {
-			System.out.println(document.toJSON());
+//		for(ODocument document : result) {
+//			System.out.println(document.toJSON());
+//		}
+		double avgInterval = 0.0;
+		int lastTimestamp = -1;
+		int maximumInterval = 0; 
+		int minimumInterval = 0;
+		for(ODocument doc : result) {
+			int timestamp = Integer.parseInt(doc.field("timestamp").toString());
+			
+			if(lastTimestamp == -1) {
+				lastTimestamp = timestamp;
+			}
+			else {
+				int diff = timestamp - lastTimestamp; 
+//				System.out.print(diff + "\t");
+				maximumInterval = maximumInterval > diff ? maximumInterval : diff;
+				minimumInterval = minimumInterval < diff ? minimumInterval : diff;
+				lastTimestamp = timestamp;
+				avgInterval += diff;
+			}
 		}
+		avgInterval /= (result.size() - 1);
+		System.out.println("\nsize:	" + result.size() + "\tavg interval:" + avgInterval + "\tMaximum Interval:" + maximumInterval + "\tMinimum Interval:" + minimumInterval + "\tDuplicate removed:" + removed);
 	}
 	
 	
