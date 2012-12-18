@@ -1,0 +1,12 @@
+<config>
+	<alerts>
+		<alert type="CpuUsageAlert">
+			<parameter name="timeWindow" value="10" />
+			<parameter name="idleTimeAlertThreshold" value="0.2" />
+		</alert>
+		<alert type="MemoryUsageAlert">
+			<parameter name="timeWindow" value="10" />
+			<parameter name="idleMemAlertThreshold" value="0.05" />
+		</alert>
+	</alerts>
+</config>

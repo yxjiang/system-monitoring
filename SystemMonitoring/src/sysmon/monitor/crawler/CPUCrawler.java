@@ -46,7 +46,7 @@ public class CPUCrawler extends Crawler<CpuMetadata>{
 			CpuPerc[] cpuPercs = sigar.getCpuPercList();
 			CpuMetadata.Core[] cores = new CpuMetadata.Core[cpuPercs.length];
 			for(int i = 0; i < cpuPercs.length; ++i) {
-				JsonObject singleCpu = new JsonObject();
+				
 				double userTime = cpuPercs[i].getUser();
 				userTime = userTime < 1.0 ? userTime : 1.0; 
 				double sysTime = cpuPercs[i].getSys();
@@ -55,11 +55,13 @@ public class CPUCrawler extends Crawler<CpuMetadata>{
 				combinedTime = combinedTime < 1.0 ? combinedTime : 1.0;
 				double idleTime = cpuPercs[i].getIdle();
 				idleTime = idleTime < 1.0 ? idleTime : 1.0;
-				singleCpu.addProperty("user-time", userTime);
-				singleCpu.addProperty("sys-time", sysTime);
-				singleCpu.addProperty("combined-time", combinedTime);
-				singleCpu.addProperty("idle-time", idleTime);
-				newMetaData.add("core-" + i, singleCpu);
+				
+//				JsonObject singleCpu = new JsonObject();
+//				singleCpu.addProperty("user-time", userTime);
+//				singleCpu.addProperty("sys-time", sysTime);
+//				singleCpu.addProperty("combined-time", combinedTime);
+//				singleCpu.addProperty("idle-time", idleTime);
+//				newMetaData.add("core-" + i, singleCpu);
 				
 				cores[i] = new CpuMetadata.Core(userTime, sysTime, combinedTime, idleTime);
 			}

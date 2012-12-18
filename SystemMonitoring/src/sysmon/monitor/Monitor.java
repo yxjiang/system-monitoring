@@ -121,20 +121,20 @@ public class Monitor {
 		}
 	}
 	
-	/**
-	 * Assemble the meta data crawled by all the crawlers.
-	 * @return
-	 */
-	public JsonObject assembleDynamicMetaData() {
-		JsonObject newAssembledMetaData = new JsonObject();
-		Date newDate = new Date();
-		newAssembledMetaData.addProperty("timestamp", newDate.getTime() / 1000);
-		for(Map.Entry<String, CrawlerWorker> entry : crawlers.entrySet()) {
-			newAssembledMetaData.add(entry.getKey(), entry.getValue().getCrawler().getDynamicMetaData());
-		}
-		
-		return newAssembledMetaData;
-	}
+//	/**
+//	 * Assemble the meta data crawled by all the crawlers.
+//	 * @return
+//	 */
+//	public JsonObject assembleDynamicMetaData() {
+//		JsonObject newAssembledMetaData = new JsonObject();
+//		Date newDate = new Date();
+//		newAssembledMetaData.addProperty("timestamp", newDate.getTime() / 1000);
+//		for(Map.Entry<String, CrawlerWorker> entry : crawlers.entrySet()) {
+//			newAssembledMetaData.add(entry.getKey(), entry.getValue().getCrawler().getDynamicMetaData());
+//		}
+//		
+//		return newAssembledMetaData;
+//	}
 	
 	public MachineMetadata assembleObject() {
 		Date newDate = new Date();
@@ -222,12 +222,12 @@ public class Monitor {
 		
 		public void sendMonitoredData() throws JMSException{
 			TextMessage metadataJsonMessage = metaDataSession.createTextMessage();
-			JsonObject metadataPackage = new JsonObject();
-			metadataPackage.addProperty("machineIPAddress", machinerIPAddress);
-			metadataPackage.addProperty("type", "metadata");
-			JsonObject assembledDynamicMetaData = assembleDynamicMetaData();
-			metadataPackage.add("metadata", assembledDynamicMetaData);
-			metadataJsonMessage.setText(metadataPackage.toString());
+//			JsonObject metadataPackage = new JsonObject();
+//			metadataPackage.addProperty("machineIPAddress", machinerIPAddress);
+//			metadataPackage.addProperty("type", "metadata");
+//			JsonObject assembledDynamicMetaData = assembleDynamicMetaData();
+//			metadataPackage.add("metadata", assembledDynamicMetaData);
+//			metadataJsonMessage.setText(metadataPackage.toString());
 			
 			ObjectMessage metadataObjMessage = metaDataSession.createObjectMessage();
 			metadataObjMessage.setObject(assembleObject());

@@ -39,7 +39,7 @@ public abstract class Crawler<T>{
 	
 	
 	/*
-	 * Fetch the dynamic meta data.
+	 * Fetch the dynamic meta data and fill into metadata object.
 	 */
 	public void updateDynamicMetaData() {
 		JsonObject newDynamicMetaData = new JsonObject();

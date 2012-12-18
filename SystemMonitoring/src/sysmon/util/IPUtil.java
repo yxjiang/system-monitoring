@@ -22,7 +22,8 @@ public class IPUtil {
 	public static String getFirstAvailableIP() {
 		try {
 			List<String> ipAddresses = retrieveIPAddresses();
-			return ipAddresses.get(0);
+			if(ipAddresses.size() > 0)
+				return ipAddresses.get(0);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}

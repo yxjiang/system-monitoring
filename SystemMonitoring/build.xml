@@ -1,5 +1,6 @@
 <project name="SystemMonitoring" default="all">
 	<property name="platform" value="amd64-linux" />
+	<property name="config-file" value="config.xml" />
 	<property name="src" value="src" />
 	<property name="lib-path" value="lib" />
 	<property name="build-dest" value="build" />
@@ -58,6 +59,7 @@
 			<fileset dir="lib">
 			</fileset>
 		</copy>
+		<copy file="${config-file}" todir="${manager-dest}"></copy>
 	</target>
 
 	<!--	build collector	-->

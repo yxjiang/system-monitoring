@@ -13,6 +13,7 @@ import sysmon.common.PassiveCommandHandler;
 import sysmon.util.GlobalParameters;
 import sysmon.util.Out;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 
@@ -29,6 +30,7 @@ public class MonitoringManager {
 	
 	private ManagerPassiveCommandHandler passiveCommandHandler;
 	private Map<String, CollectorProfile> collectorsProfile;
+	private JsonArray alertJsonConfig;
 	
 	/**
 	 * Get the singleton of monitoring manager.
@@ -43,6 +45,14 @@ public class MonitoringManager {
 	
 	private MonitoringManager() {
 		this.collectorsProfile = new HashMap<String, CollectorProfile>();
+		this.alertJsonConfig = ConfigReader.getAlertsConfig();
+		if(this.alertJsonConfig == null) {
+			Out.println("Config file config.xml cannot be found!");
+			System.exit(1);
+		}
+		else {
+			Out.println("Read config file.");
+		}
 		this.passiveCommandHandler = new ManagerPassiveCommandHandler(GlobalParameters.MANAGER_COMMAND_PORT);
 	}
 	
@@ -143,6 +153,8 @@ public class MonitoringManager {
 						JsonObject responseJson = new JsonObject();
 						responseJson.addProperty("type", "collector-registration-response");
 						responseJson.addProperty("value", "success");
+						responseJson.add("alertsConfig", alertJsonConfig);
+						
 						responseMessage.setJMSCorrelationID(commandMessage.getJMSCorrelationID());
 						responseMessage.setText(responseJson.toString());
 						this.commandProducer.send(commandMessage.getJMSReplyTo(), responseMessage);

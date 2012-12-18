@@ -26,6 +26,10 @@ public abstract class PassiveCommandHandler extends	CommandHandler {
 	public PassiveCommandHandler(String servicePort) {
 		super();
 		this.ipAddress = IPUtil.getFirstAvailableIP();
+		if(ipAddress == null) {
+			Out.println("This machine cannot access the network.");
+			System.exit(1);
+		}
 		this.servicePort = servicePort;
 		this.brokerAddress = "tcp://" + ipAddress + ":" + servicePort;
 		createCommandServiceBroker();

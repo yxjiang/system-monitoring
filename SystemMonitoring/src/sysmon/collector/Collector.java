@@ -22,6 +22,8 @@ import sysmon.util.Out;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
@@ -49,17 +51,25 @@ public class Collector {
 		this.monitorsAddresses = new HashMap<String, MonitorProfile>();
 		this.commandSender = new CollectorCommandSender(this.managerBrokerAddress);
 		this.commandReceiver = new CollectorCommandReceiver(GlobalParameters.COLLECTOR_COMMAND_PORT);
-		this.cepStream = new CEPStream();
 	}
 	
 	public void start() {
 		try {
 			commandSender.registerToManager();
-			Thread cepThread = new Thread(cepStream);
-			cepThread.start();
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Receive the collector response information from manager.
+	 * Initialize all the alert monitors.
+	 * @param collectorResponseJson
+	 */
+	private void initAlertMonitors(JsonArray alertsConfig) {
+		this.cepStream = new CEPStream(alertsConfig);
+		Thread cepThread = new Thread(cepStream);
+		cepThread.start();
 	}
 	
 	/**
@@ -172,6 +182,11 @@ public class Collector {
 					JsonObject jsonObj = (JsonObject)jsonParser.parse(commandJson);
 					if(jsonObj.get("type").getAsString().equals("collector-registration-response") && 
 							jsonObj.get("value").getAsString().equals("success")) {
+						JsonElement configElement = jsonObj.get("alertsConfig");
+						if(configElement != null) {
+							JsonArray configJsonArray = configElement.getAsJsonArray();
+							initAlertMonitors(configJsonArray);
+						}
 						Out.println("Registration successfully.");
 					}
 				} catch (JMSException e) {
@@ -189,16 +204,29 @@ public class Collector {
 	class CEPStream implements Runnable{
 		private EPServiceProvider cepService;
 		
-		public CEPStream() {
+		CEPStream(JsonArray alertsConfig) {
 			Configuration config = new Configuration();
 			config.addEventTypeAutoName("sysmon.common.metadata");
 			cepService = EPServiceProviderManager.getDefaultProvider(config);
+			setAlertMonitors(alertsConfig);
+		}
+		
+		/**
+		 * Set the alerts.
+		 * @param collectorRegisterResponse
+		 */
+		private void setAlertMonitors(JsonArray alertsConfig) {
+			for(JsonElement alert : alertsConfig) {
+				JsonObject alertJson = (JsonObject)alert;
+				Out.println("Add alert [" + alertJson.get("type").getAsString() + "].");
+			}
+			
+			new CpuUsageAlert(cepService);
 		}
 
 		@Override
 		public void run() {
-			String avgCoreIdle = "select machineIP, avg(cpu.idleTime) as avg from MachineMetadata.win:length(10) group by machineIP";
-			new CpuUsageAlert(cepService);
+			
 		}
 	}
 	

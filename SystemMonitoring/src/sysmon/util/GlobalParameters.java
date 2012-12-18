@@ -13,5 +13,7 @@ public class GlobalParameters {
 
 	public final static String EMBEDDED_DB_USERNAME = "admin";
 	public final static String EMBEDDED_DB_PASSWORD = "admin";
+	
+	public final static String ALERT_CONFIG_FILE_PATH = "config.xml";
 
 }
