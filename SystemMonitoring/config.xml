@@ -1,4 +1,5 @@
 <config>
+	<monitorAssignStrategy type="load-balance" />
 	<alerts>
 		<alert type="CpuUsageAlert">
 			<parameter name="timeWindow" value="10" />

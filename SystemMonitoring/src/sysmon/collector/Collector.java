@@ -221,7 +221,7 @@ public class Collector {
 				Out.println("Add alert [" + alertJson.get("type").getAsString() + "].");
 			}
 			
-			new CpuUsageAlert(cepService);
+			new CpuUsageAlert(cepService, 10, 0.1);
 		}
 
 		@Override

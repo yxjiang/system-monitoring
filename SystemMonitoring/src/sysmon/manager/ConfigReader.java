@@ -26,6 +26,47 @@ import com.google.gson.JsonObject;
  */
 public class ConfigReader {
 	
+	private static Document doc;
+	
+	/**
+	 * Get the configuration about how to assign monitors to collectors.
+	 * @return
+	 */
+	public static JsonObject getCollectorAssignConfig() {
+		JsonObject assignConfigObj = new JsonObject();
+		
+		try {
+			Document doc = readConfigFile();
+			if(doc == null) {
+				return null;
+			}
+			Element root = doc.getDocumentElement();
+			NodeList nodeList = root.getElementsByTagName("monitorAssignStrategy");
+			for(int i = 0; i < nodeList.getLength(); ++i) {
+				Node strategyNode = nodeList.item(i);
+				if(strategyNode instanceof Element) {
+					Element strategyElement = (Element)strategyNode;
+					String strategyType = strategyElement.getAttribute("type");
+					assignConfigObj.addProperty("strategy", strategyType);
+					break;
+				}
+			}
+			return assignConfigObj;
+		} catch (ParserConfigurationException e) {
+			Out.println("When reading config file. " + e.getMessage());
+		} catch (SAXException e) {
+			Out.println("When reading config file. " + e.getMessage());
+		} catch (IOException e) {
+			Out.println("When reading config file. " + e.getMessage());
+		} 
+		
+		return null;
+	}
+	
+	/**
+	 * Get the configuration about alert setting on collectors.
+	 * @return
+	 */
 	public static JsonArray getAlertsConfig() {
 		JsonArray alertsConfigArray = new JsonArray();
 		
@@ -78,6 +119,10 @@ public class ConfigReader {
 	 * @throws IOException
 	 */
 	private static Document readConfigFile() throws ParserConfigurationException, SAXException, IOException {
+		if(doc != null) {
+			return doc;
+		}
+		
 		File fmlFile = new File(GlobalParameters.ALERT_CONFIG_FILE_PATH);
 		if(fmlFile.exists() == false) {
 			return null;

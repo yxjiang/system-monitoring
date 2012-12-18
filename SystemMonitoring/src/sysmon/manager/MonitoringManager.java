@@ -29,8 +29,9 @@ public class MonitoringManager {
 	private static MonitoringManager instance;
 	
 	private ManagerPassiveCommandHandler passiveCommandHandler;
-	private Map<String, CollectorProfile> collectorsProfile;
+	private Map<String, CollectorProfile> collectorsProfiles;
 	private JsonArray alertJsonConfig;
+	private MonitorAssigner monitorAssigner;
 	
 	/**
 	 * Get the singleton of monitoring manager.
@@ -44,8 +45,15 @@ public class MonitoringManager {
 	}
 	
 	private MonitoringManager() {
-		this.collectorsProfile = new HashMap<String, CollectorProfile>();
+		this.collectorsProfiles = new HashMap<String, CollectorProfile>();
 		this.alertJsonConfig = ConfigReader.getAlertsConfig();
+		JsonObject assignStrategy = ConfigReader.getCollectorAssignConfig();
+		String strategy = assignStrategy.get("strategy").getAsString();
+		
+		if(strategy.equals("load-balance")) {
+			this.monitorAssigner = new LoadBalanceAssigner(this.collectorsProfiles);
+		}
+		
 		if(this.alertJsonConfig == null) {
 			Out.println("Config file config.xml cannot be found!");
 			System.exit(1);
@@ -87,7 +95,7 @@ public class MonitoringManager {
 		CollectorProfile assignedCollectorProfile = null;
 		int leastLoad = Integer.MAX_VALUE;
 		
-		for(Map.Entry<String, CollectorProfile> entry : collectorsProfile.entrySet()) {
+		for(Map.Entry<String, CollectorProfile> entry : collectorsProfiles.entrySet()) {
 			int collectorLoad = entry.getValue().monitorSet.size();
 			if(collectorLoad < leastLoad) {
 				assignedCollector = entry.getKey();
@@ -98,7 +106,7 @@ public class MonitoringManager {
 				break;
 		}
 		assignedCollectorProfile.monitorSet.add(monitorName);
-		collectorsProfile.put(assignedCollector, assignedCollectorProfile);
+		collectorsProfiles.put(assignedCollector, assignedCollectorProfile);
 		Out.println("Assign [" + monitorName + "] to [" + assignedCollectorProfile.collectorBrokerAddress + "]");
 		return assignedCollectorProfile.collectorBrokerAddress;
 	}
@@ -149,7 +157,7 @@ public class MonitoringManager {
 						String collectorIPAddress = jsonObj.get("collectorIPAddress").getAsString();
 						String collectorBrokerAddress = jsonObj.get("collectorBrokerAddress").getAsString();
 						CollectorProfile profile = new CollectorProfile(collectorIPAddress, collectorBrokerAddress);
-						collectorsProfile.put(collectorIPAddress, profile);
+						collectorsProfiles.put(collectorIPAddress, profile);
 						JsonObject responseJson = new JsonObject();
 						responseJson.addProperty("type", "collector-registration-response");
 						responseJson.addProperty("value", "success");
