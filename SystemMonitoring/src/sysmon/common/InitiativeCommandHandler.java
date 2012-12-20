@@ -3,7 +3,6 @@ package sysmon.common;
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.Session;
 import javax.jms.TemporaryQueue;
 

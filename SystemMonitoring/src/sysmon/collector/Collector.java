@@ -212,16 +212,22 @@ public class Collector {
 		}
 		
 		/**
-		 * Set the alerts.
+		 * Set the alerts based on the received alert configuration.
 		 * @param collectorRegisterResponse
 		 */
 		private void setAlertMonitors(JsonArray alertsConfig) {
 			for(JsonElement alert : alertsConfig) {
 				JsonObject alertJson = (JsonObject)alert;
+				String alertName = alertJson.get("type").getAsString();
+				JsonObject parameters = alertJson.get("parameters").getAsJsonObject();
+				if(alertName.equals("CpuUsageAlert")) {
+					String timeWindowStr = parameters.get("timeWindow").getAsJsonObject().get("value").getAsString();
+					String idleTimeAlertThresholdStr = parameters.get("idleTimeAlertThreshold").getAsJsonObject().get("value").getAsString();
+					new CpuUsageAlert(cepService, Integer.parseInt(timeWindowStr), Float.parseFloat(idleTimeAlertThresholdStr));
+				}
 				Out.println("Add alert [" + alertJson.get("type").getAsString() + "].");
 			}
 			
-			new CpuUsageAlert(cepService, 10, 0.1);
 		}
 
 		@Override

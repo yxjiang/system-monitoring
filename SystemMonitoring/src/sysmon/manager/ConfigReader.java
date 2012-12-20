@@ -85,7 +85,7 @@ public class ConfigReader {
 					JsonObject alertJson = new JsonObject();
 					alertJson.addProperty("type", alertType);
 					NodeList parameters = alertElement.getElementsByTagName("parameter");
-					JsonArray parameterArray = new JsonArray();
+					JsonObject parameterObj = new JsonObject();
 					for(int j = 0; j < parameters.getLength(); ++j) {
 						JsonObject parameterJson = new JsonObject();
 						Element paramElement = (Element)parameters.item(j);
@@ -93,9 +93,9 @@ public class ConfigReader {
 						String parameterValue = paramElement.getAttribute("value");
 						parameterJson.addProperty("name", parameterName);
 						parameterJson.addProperty("value", parameterValue);
-						parameterArray.add(parameterJson);
+						parameterObj.add(parameterName, parameterJson);
 					}
-					alertJson.add("parameters", parameterArray);
+					alertJson.add("parameters", parameterObj);
 					alertsConfigArray.add(alertJson);
 				}
 			}
