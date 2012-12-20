@@ -6,6 +6,7 @@ import java.util.Random;
 import sysmon.common.metadata.CpuMetadata;
 import sysmon.common.metadata.MachineMetadata;
 import sysmon.util.IPUtil;
+import sysmon.esper.TestListener;
 
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
@@ -20,7 +21,7 @@ public class Driver {
 		EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
 		String experssion = "select avg(cpu.cores[0].idleTime) as a from MachineMetadata.win:length(5)";
 		EPStatement statement = epService.getEPAdministrator().createEPL(experssion);
-		MyListener listener = new MyListener();
+		TestListener listener = new TestListener();
 		statement.addListener(listener);
 		Random rnd = new Random();
 		for(int i = 0; i < 10; ++i) {

@@ -120,11 +120,11 @@ public class Collector {
 						MonitorProfile monitorProfile = new MonitorProfile(enrollMonitorIPAddress, staticMetadataObj.toString());
 						monitorsAddresses.put(enrollMonitorIPAddress, monitorProfile);
 					}
-					else if(type.equals("metadata")) {	//	receive metadata from monitor
-						String monitorName = jsonObj.get("machineIPAddress").getAsString();
-						Out.println("Recieve data from [" + monitorName + "]");
-						Out.println(jsonObj.toString());
-					}
+//					else if(type.equals("metadata")) {	//	receive metadata from monitor
+//						String monitorName = jsonObj.get("machineIPAddress").getAsString();
+//						Out.println("Recieve data from [" + monitorName + "]");
+//						Out.println(jsonObj.toString());
+//					}
 				} catch (JMSException e) {
 					e.printStackTrace();
 				}
