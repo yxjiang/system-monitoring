@@ -2,6 +2,9 @@ package sysmon.common.metadata;
 
 import java.io.Serializable;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 public class CpuMetadata implements Serializable{
 	private String type;
 	private double userTime;
@@ -57,6 +60,24 @@ public class CpuMetadata implements Serializable{
 	public Core[] getCores() {
 		return this.cores;
 	}
+	
+	public JsonObject getJson() {
+		JsonObject metadata = new JsonObject();
+		metadata.addProperty("type", type);
+		metadata.addProperty("userTime", userTime);
+		metadata.addProperty("sysTime", sysTime);
+		metadata.addProperty("combinedTime", combinedTime);
+		metadata.addProperty("idleTime", idleTime);
+		
+		JsonArray coresJson = new JsonArray();
+		for(Core core : cores) {
+			JsonObject coreJson = core.getJson();
+			coresJson.add(coreJson);
+		}
+		metadata.add("cores", coresJson);
+		
+		return metadata;
+	}
 
 	public static class Core implements Serializable{
 		private double userTime;
@@ -103,6 +124,15 @@ public class CpuMetadata implements Serializable{
 
 		public void setIdleTime(double idleTime) {
 			this.idleTime = idleTime;
+		}
+		
+		public JsonObject getJson() {
+			JsonObject coreJson = new JsonObject();
+			coreJson.addProperty("userTime", userTime);
+			coreJson.addProperty("sysTime", sysTime);
+			coreJson.addProperty("combinedTime", combinedTime);
+			coreJson.addProperty("idleTime", idleTime);
+			return coreJson;
 		}
 
 	}

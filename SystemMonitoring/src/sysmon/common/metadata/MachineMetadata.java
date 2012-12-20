@@ -2,6 +2,8 @@ package sysmon.common.metadata;
 
 import java.io.Serializable;
 
+import com.google.gson.JsonObject;
+
 public class MachineMetadata implements Serializable{
 	
 	private long timestamp;
@@ -37,6 +39,16 @@ public class MachineMetadata implements Serializable{
 
 	public void setCpu(CpuMetadata cpu) {
 		this.cpu = cpu;
+	}
+	
+	public JsonObject getJson() {
+		JsonObject metadata = new JsonObject();
+		
+		metadata.addProperty("timestamp", timestamp);
+		metadata.addProperty("machineIP", machineIP);
+		metadata.add("cpu", cpu.getJson());
+		
+		return metadata;
 	}
 	
 	

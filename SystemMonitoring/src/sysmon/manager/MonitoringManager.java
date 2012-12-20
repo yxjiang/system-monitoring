@@ -156,26 +156,6 @@ public class MonitoringManager {
 						Out.println("Receive unidentified command.");
 					}
 					
-					
-//					switch (eventType) {
-//					case "monitor-registration":
-//						handleMonitorRegistration(commandJsonObj, commandMessage);
-//						break;
-//					case "collector-registration":
-//						handleCollectorRegistration(commandJsonObj, commandMessage);
-//						break;
-//					case "retrieve-collectors":
-//						handleRetrieveCollectors(commandMessage);
-//						break;
-//					case "retrieve-monitors":
-//						handleRetrieveMonitors(commandMessage);
-//						break;
-//					case "retrieve-monitors-by-collector":
-//						handleRetrieveMonitorsByCollector(commandJsonObj, commandMessage);
-//						break;
-//					default:
-//						Out.println("Receive unidentified command.");
-//					}
 				} catch (JMSException e) {
 					e.printStackTrace();
 				}
@@ -220,7 +200,7 @@ public class MonitoringManager {
 			responseJson.addProperty("type", "collector-registration-response");
 			responseJson.addProperty("value", "success");
 			responseJson.add("alertsConfig", alertJsonConfig);
-			Out.println("Collector [" + collectorIPAddress + ":] registered.");
+			Out.println("Collector [" + collectorIPAddress + "] registered.");
 			TextMessage responseMessage = this.commandServiceSession.createTextMessage();
 			responseMessage.setJMSCorrelationID(commandMessage.getJMSCorrelationID());
 			responseMessage.setText(responseJson.toString());

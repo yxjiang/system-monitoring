@@ -23,5 +23,4 @@ public abstract class MonitorAssigner {
 	 * @return
 	 */
 	public abstract String assignMonitorToCollector(String monitorName);
-
 }
