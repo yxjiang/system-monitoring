@@ -222,12 +222,6 @@ public class Monitor {
 		
 		public void sendMonitoredData() throws JMSException{
 			TextMessage metadataJsonMessage = metaDataSession.createTextMessage();
-//			JsonObject metadataPackage = new JsonObject();
-//			metadataPackage.addProperty("machineIPAddress", machinerIPAddress);
-//			metadataPackage.addProperty("type", "metadata");
-//			JsonObject assembledDynamicMetaData = assembleDynamicMetaData();
-//			metadataPackage.add("metadata", assembledDynamicMetaData);
-//			metadataJsonMessage.setText(metadataPackage.toString());
 			
 			ObjectMessage metadataObjMessage = metaDataSession.createObjectMessage();
 			metadataObjMessage.setObject(assembleObject());
@@ -235,7 +229,6 @@ public class Monitor {
 			String correlateionID = UUID.randomUUID().toString();
 			metadataJsonMessage.setJMSCorrelationID(correlateionID);
 			metadataObjMessage.setJMSCorrelationID(correlateionID);
-//			this.metaDataProducer.send(metadataJsonMessage);
 			this.metaDataProducer.send(metadataObjMessage);
 			
 		}
