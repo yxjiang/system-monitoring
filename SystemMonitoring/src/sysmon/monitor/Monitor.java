@@ -76,11 +76,7 @@ public class Monitor {
 	public void start() {
 		assembleStaticMetaData();
 		startMonitorWorkers();
-		try {
-			commandSender.registerToManager();
-		} catch (JMSException e1) {
-			e1.printStackTrace();
-		}
+		commandSender.registerToManager();
 		MetadataMessageSender metadataSender = new MetadataMessageSender();
 		Thread metaDataSenderThread = new Thread(metadataSender);
 		metaDataSenderThread.start();
@@ -266,16 +262,22 @@ public class Monitor {
 		 * Register the monitor.
 		 * @throws JMSException 
 		 */
-		private void registerToManager() throws JMSException {
-			TextMessage registerCommandMessage = commandServiceSession.createTextMessage();
-			JsonObject commandJson = new JsonObject();
-			commandJson.addProperty("type", "monitor-registration");
-			commandJson.addProperty("machineIPAddress", machinerIPAddress);
-			String correlateionID = UUID.randomUUID().toString();
-			registerCommandMessage.setJMSCorrelationID(correlateionID);
-			registerCommandMessage.setJMSReplyTo(this.commandServiceTemporaryQueue);
-			registerCommandMessage.setText(commandJson.toString());
-			commandProducer.send(registerCommandMessage);
+		private void registerToManager() {
+			TextMessage registerCommandMessage;
+			try {
+				registerCommandMessage = commandServiceSession.createTextMessage();
+				JsonObject commandJson = new JsonObject();
+				commandJson.addProperty("type", "monitor-registration");
+				commandJson.addProperty("machineIPAddress", machinerIPAddress);
+				String correlateionID = UUID.randomUUID().toString();
+				registerCommandMessage.setJMSCorrelationID(correlateionID);
+				registerCommandMessage.setJMSReplyTo(this.commandServiceTemporaryQueue);
+				registerCommandMessage.setText(commandJson.toString());
+				commandProducer.send(registerCommandMessage);
+			} catch (JMSException e) {
+				Out.error("Register to manager failed.");
+				System.exit(1);
+			}
 		}
 		
 		/**
