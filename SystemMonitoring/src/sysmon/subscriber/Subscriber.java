@@ -1,5 +1,6 @@
 package sysmon.subscriber;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.jms.Connection;
@@ -31,12 +32,14 @@ public class Subscriber {
 	final private String destination;
 	private BrokerService broker;
 	private List<String> inputBrokerAddresses;
+	private List<SubscribeWorker> workerList;
 
 	public Subscriber(List<String> inputBrokerAddresses) {
 		this.brokerUrl = "tcp://" + IPUtil.getFirstAvailableIP() + ":"
 				+ GlobalParameters.SUBSCRIBE_COMMAND_PORT;
 		this.destination = "command";
 		this.inputBrokerAddresses = inputBrokerAddresses;
+		this.workerList = new ArrayList<SubscribeWorker>();
 		createBroker();
 		startWorkers();
 	}
@@ -57,10 +60,24 @@ public class Subscriber {
 
 	private void startWorkers() {
 		for (final String brokerAddress : inputBrokerAddresses) {
-			new SubscribeWorker(brokerAddress, brokerUrl, destination);
+			this.workerList.add(new SubscribeWorker(brokerAddress, brokerUrl, destination));
 		}
 	}
 
+	public void stop() {
+		for(SubscribeWorker worker : this.workerList) {
+			try {
+				worker.stop();
+			} catch (JMSException e) {
+				e.printStackTrace();
+			}
+		}
+		try {
+			broker.stop();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	/**
 	 * SubscribeWorker is in charge of receiving message from one collector.
@@ -76,6 +93,10 @@ public class Subscriber {
 
 		private MessageConsumer consumer;
 		private MessageProducer producer;
+		private Session inputSession;
+		private Connection inputConnection;
+		private Session outputSession;
+		private Connection outputConnection;
 
 		public SubscribeWorker(String inputBrokerAddress,
 				String outputBrokerAddress, String outputDestination) {
@@ -92,10 +113,10 @@ public class Subscriber {
 		private void init() throws JMSException {
 			ConnectionFactory inputConnectionFactory = new ActiveMQConnectionFactory(
 					inputBrokerAddress);
-			Connection inputConnection = inputConnectionFactory.createConnection();
+			inputConnection = inputConnectionFactory.createConnection();
 			inputConnection.start();
 
-			Session inputSession = inputConnection.createSession(false,
+			inputSession = inputConnection.createSession(false,
 					Session.AUTO_ACKNOWLEDGE);
 			Topic inputTopic = inputSession.createTopic("command");
 			consumer = inputSession.createConsumer(inputTopic);
@@ -103,14 +124,23 @@ public class Subscriber {
 
 			ConnectionFactory outputConnectionFactory = new ActiveMQConnectionFactory(
 					outputBrokerAddress);
-			Connection outputConnection = outputConnectionFactory.createConnection();
+			outputConnection = outputConnectionFactory.createConnection();
 			outputConnection.start();
 
-			Session outputSession = outputConnection.createSession(false,
+			outputSession = outputConnection.createSession(false,
 					Session.AUTO_ACKNOWLEDGE);
 			Topic outputTopic = outputSession.createTopic(outputDestination);
 			producer = outputSession.createProducer(outputTopic);
 			producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+		}
+		
+		public void stop() throws JMSException {
+			producer.close();
+			consumer.close();
+			outputSession.close();
+			outputConnection.close();
+			inputSession.close();
+			inputConnection.close();
 		}
 
 		@Override

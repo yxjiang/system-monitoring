@@ -8,16 +8,20 @@
 	<property name="manager-jar" value="manager.jar" />
 	<property name="collector-jar" value="collector.jar" />
 	<property name="monitor-jar" value="monitor.jar" />
+	<property name="subscriber-jar" value="subscriber.jar" />
+
 	<property name="manager-dest" value="${build-dest}/manager" />
 	<property name="collector-dest" value="${build-dest}/collector" />
 	<property name="monitor-dest" value="${build-dest}/monitor" />
-	
+	<property name="subscriber-dest" value="${build-dest}/subscriber" />
+
+
 	<path id="project.libs">
 		<fileset dir="lib">
 			<include name="*.jar" />
 		</fileset>
 	</path>
-	
+
 	<!-- Concatenate lib jars to make manifest -->
 	<pathconvert property="lib" pathsep=" ">
 		<mapper>
@@ -35,10 +39,10 @@
 	<target name="init">
 		<mkdir dir="${classes}" />
 	</target>
-	
+
 	<target name="all" depends="manager, collector, monitor">
 	</target>
-	
+
 	<!--	build manager	-->
 	<target name="compile-manager" depends="init">
 		<javac srcdir="${src}" destdir="${classes}">
@@ -54,12 +58,14 @@
 				</attribute>
 			</manifest>
 		</jar>
-		<move file="${manager-jar}" todir="${manager-dest}"></move>
+		<move file="${manager-jar}" todir="${manager-dest}">
+		</move>
 		<copy todir="${manager-dest}/lib">
 			<fileset dir="lib">
 			</fileset>
 		</copy>
-		<copy file="${config-file}" todir="${manager-dest}"></copy>
+		<copy file="${config-file}" todir="${manager-dest}">
+		</copy>
 	</target>
 
 	<!--	build collector	-->
@@ -77,7 +83,8 @@
 				</attribute>
 			</manifest>
 		</jar>
-		<move file="${collector-jar}" todir="${collector-dest}"></move>
+		<move file="${collector-jar}" todir="${collector-dest}">
+		</move>
 		<copy todir="${collector-dest}/lib">
 			<fileset dir="lib">
 			</fileset>
@@ -99,7 +106,8 @@
 				</attribute>
 			</manifest>
 		</jar>
-		<move file="${monitor-jar}" todir="${monitor-dest}"></move>
+		<move file="${monitor-jar}" todir="${monitor-dest}">
+		</move>
 		<copy todir="${monitor-dest}/lib">
 			<fileset dir="lib">
 			</fileset>
@@ -107,7 +115,24 @@
 		<echo>Copy the sigar native library</echo>
 		<copy file="${lib-path}/libsigar-amd64-linux.so" todir="${monitor-dest}" />
 	</target>
-	
+
+	<!-- build subscriber library -->
+	<target name="subscriber" description="compile the subscriber as a jar file, this jar depends on activemq">
+		<javac srcdir="${src}" destdir="${classes}">
+			<classpath refid="project.libs">
+			</classpath>
+		</javac>
+		<jar jarfile="${subscriber-jar}" basedir="${classes}" />
+		<move file="${subscriber-jar}" todir="${subscriber-dest}" />
+		<copy todir="${subscriber-dest}/lib">
+			<fileset dir="lib">
+				<include name="active*"/>
+				<include name="commons*"/>
+				<include name="gson*"/>
+			</fileset>
+		</copy>
+	</target>
+
 	<target name="clean">
 		<delete dir="${build-dest}" />
 		<delete file="${manager-jar}" />
