@@ -35,8 +35,7 @@ public class Subscriber {
 	private List<SubscribeWorker> workerList;
 
 	public Subscriber(List<String> inputBrokerAddresses) {
-		this.brokerUrl = "tcp://" + IPUtil.getFirstAvailableIP() + ":"
-				+ GlobalParameters.SUBSCRIBE_COMMAND_PORT;
+		this.brokerUrl = "tcp://" + IPUtil.getFirstAvailableIP() + ":" + GlobalParameters.SUBSCRIBE_COMMAND_PORT;
 		this.destination = "command";
 		this.inputBrokerAddresses = inputBrokerAddresses;
 		this.workerList = new ArrayList<SubscribeWorker>();

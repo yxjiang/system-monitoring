@@ -28,7 +28,7 @@ public class TestMachineMetadata {
 		for(int j = 0; j < 4; ++j) {
 			cores1[j] = new CpuMetadata.Core(rnd.nextFloat() % 1, rnd.nextFloat() % 1, rnd.nextFloat() % 1, 0.2f);
 		}
-		CpuMetadata event1 = new CpuMetadata("cpu", cores1);
+		CpuMetadata event1 = new CpuMetadata(cores1);
 		MachineMetadata machineMetadata1 = new MachineMetadata(new Date().getTime() / 1000, IPUtil.getFirstAvailableIP());
 		machineMetadata1.setCpu(event1);
 		System.out.println(gson.toJson(machineMetadata1));

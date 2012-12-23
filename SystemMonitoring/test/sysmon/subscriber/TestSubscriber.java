@@ -46,7 +46,7 @@ public class TestSubscriber implements MessageListener{
 		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerAddress);
 		Connection connection = connectionFactory.createConnection();
 		connection.start();
-		System.out.println("Connect to " + brokerAddress);
+		System.out.println("Connect to gather " + brokerAddress);
 		
 		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		Topic topic = session.createTopic("command");
@@ -61,8 +61,10 @@ public class TestSubscriber implements MessageListener{
 			try {
 				MachineMetadata machineMetadata = (MachineMetadata)objectMessage.getObject();
 				JsonObject jsonObj = machineMetadata.getJson();
+//				System.out.println(jsonObj.toString());
 				String ip = jsonObj.get("machineIP").getAsString();
-				System.out.println("[" + new Date() + "] receive new message from [" + ip + "].");
+				long memoryFree = jsonObj.get("memory").getAsJsonObject().get("free").getAsLong();
+				System.out.println("[" + new Date() + "] receive new message from [" + ip + "], free memory: " + memoryFree + ".");
 			} catch (JMSException e) {
 				e.printStackTrace();
 			}
@@ -70,12 +72,13 @@ public class TestSubscriber implements MessageListener{
 	}
 	
 	public static void main(String[] args) {
-//		String collectorIP = "131.94.130.167";
-		String collectorIP = IPUtil.getFirstAvailableIP();
+//		String gatherIP = "131.94.130.167";
+		String gatherIP = IPUtil.getFirstAvailableIP();
 		List<String> list = new ArrayList<String>();
-		list.add("tcp://131.94.130.167:" + GlobalParameters.COLLECTOR_COMMAND_PORT);
-		list.add("tcp://192.168.0.108:" + GlobalParameters.COLLECTOR_COMMAND_PORT);
-		TestSubscriber subTest = new TestSubscriber(collectorIP, list);
+//		list.add("tcp://131.94.130.167:" + GlobalParameters.COLLECTOR_COMMAND_PORT);
+//		list.add("tcp://192.168.0.108:" + GlobalParameters.COLLECTOR_COMMAND_PORT);
+		list.add("tcp://10.105.36.56:" + GlobalParameters.COLLECTOR_COMMAND_PORT);
+		TestSubscriber subTest = new TestSubscriber(gatherIP, list);
 		
 	}
 	

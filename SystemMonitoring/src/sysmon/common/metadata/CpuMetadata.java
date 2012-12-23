@@ -13,9 +13,9 @@ public class CpuMetadata implements Serializable{
 	private double idleTime;
 	private Core[] cores;
 
-	public CpuMetadata(String type, Core[] cores) {
+	public CpuMetadata(Core[] cores) {
 		super();
-		this.type = type;
+		this.type = "cpu";
 		this.cores = cores;
 		for(Core core : cores) {
 			userTime += core.getUserTime();

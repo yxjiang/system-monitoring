@@ -20,8 +20,10 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import sysmon.common.InitiativeCommandHandler;
 import sysmon.common.metadata.CpuMetadata;
 import sysmon.common.metadata.MachineMetadata;
+import sysmon.common.metadata.MemoryMetadata;
 import sysmon.monitor.crawler.CPUCrawler;
 import sysmon.monitor.crawler.Crawler;
+import sysmon.monitor.crawler.MemoryCrawler;
 import sysmon.util.GlobalParameters;
 import sysmon.util.IPUtil;
 import sysmon.util.Out;
@@ -140,6 +142,9 @@ public class Monitor {
 			Object metadataObject = entry.getValue().getCrawler().getMetadataObject();
 			if(metadataObject instanceof CpuMetadata) {
 				machineMetadata.setCpu((CpuMetadata)metadataObject);
+			}
+			else if(metadataObject instanceof MemoryMetadata) {
+				machineMetadata.setMemory((MemoryMetadata)metadataObject);
 			}
 		}
 		
@@ -337,7 +342,9 @@ public class Monitor {
 		String managerBrokerAddress = "tcp://" + args[0] + ":" + GlobalParameters.MANAGER_COMMAND_PORT;
 		Monitor m = new Monitor(managerBrokerAddress);
 		Crawler cpuCrawler = new CPUCrawler("cpu");
+		Crawler memoryCrawler = new MemoryCrawler("memory");
 		m.addCrawler(cpuCrawler);
+		m.addCrawler(memoryCrawler);
 		m.start();
 	}
 	

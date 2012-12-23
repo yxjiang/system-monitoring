@@ -65,7 +65,7 @@ public class CPUCrawler extends Crawler<CpuMetadata>{
 				
 				cores[i] = new CpuMetadata.Core(userTime, sysTime, combinedTime, idleTime);
 			}
-			this.metadataObject = new CpuMetadata("cpu", cores);
+			this.metadataObject = new CpuMetadata(cores);
 		} catch (SigarException e) {
 			e.printStackTrace();
 		}

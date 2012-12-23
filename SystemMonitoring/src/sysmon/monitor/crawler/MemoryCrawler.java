@@ -5,8 +5,9 @@ import java.util.Map;
 import org.hyperic.sigar.Mem;
 import org.hyperic.sigar.SigarException;
 
+import sysmon.common.metadata.MemoryMetadata;
+
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 /**
@@ -14,7 +15,7 @@ import com.google.gson.JsonObject;
  * @author yexijiang
  *
  */
-public class MemoryCrawler extends Crawler {
+public class MemoryCrawler extends Crawler<MemoryMetadata> {
 
 	private Mem mem;
 	private Gson gson;
@@ -41,10 +42,30 @@ public class MemoryCrawler extends Crawler {
 
 	@Override
 	protected void fetchDynamicMetaDataHelper(JsonObject newMetaData) {
-		Map<Object, Object> map = mem.toMap();
-		for(Map.Entry<Object, Object> entry : map.entrySet()) {
-			newMetaData.addProperty(entry.getKey().toString(), entry.getValue().toString());
+		try {
+			mem = sigar.getMem();
+		} catch (SigarException e) {
+			e.printStackTrace();
 		}
+		
+		MemoryMetadata memoryMetadata = new MemoryMetadata();
+		memoryMetadata.setUsed(mem.getUsed());
+		memoryMetadata.setActualUsed(mem.getActualUsed());
+		memoryMetadata.setActualFree(mem.getActualFree());
+		memoryMetadata.setFreePercent(mem.getFreePercent());
+		memoryMetadata.setActualFree(mem.getActualFree());
+		memoryMetadata.setRam(mem.getRam());
+		memoryMetadata.setUsedPercent(mem.getUsedPercent());
+		memoryMetadata.setFree(mem.getFree());
+		memoryMetadata.setTotal(mem.getTotal());
+		
+		this.metadataObject = memoryMetadata;
+		
+//		Map<Object, Object> map = mem.toMap();
+//		for(Map.Entry<Object, Object> entry : map.entrySet()) {
+//			newMetaData.addProperty(entry.getKey().toString(), entry.getValue().toString());
+//		}
+		
 	}
 
 }
