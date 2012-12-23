@@ -5,8 +5,8 @@ import java.util.Map;
 import sysmon.manager.MonitoringManager.CollectorProfile;
 
 /**
- * Assign a given monitor to proper collector.
- * @author Yexi Jiang (http://users.cs.fiu.edu/~yjian004)
+ * Assign the monitor to proper collector.
+ * @author yexijiang
  *
  */
 public abstract class MonitorAssigner {
@@ -18,8 +18,8 @@ public abstract class MonitorAssigner {
 	}
 	
 	/**
-	 * Assign a given monitor to collector.
-	 * @param monitor
+	 * Assign the given monitor to proper collector.
+	 * @param monitorName
 	 * @return
 	 */
 	public abstract String assignMonitorToCollector(String monitorName);
