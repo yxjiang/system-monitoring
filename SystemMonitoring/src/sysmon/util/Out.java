@@ -19,7 +19,7 @@ public class Out {
 	
 	public void println(String message) {
 //		System.out.println("[" + new Date() + "] " + message);
-		globalLogger.trace(message);
+		globalLogger.info(message);
 	}
 	
 	public void error(String message) {
