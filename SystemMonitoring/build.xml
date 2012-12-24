@@ -1,6 +1,7 @@
 <project name="SystemMonitoring" default="all">
 	<property name="platform" value="amd64-linux" />
 	<property name="config-file" value="config.xml" />
+	<property name="log-config-file" value="log4j.properties" />
 	<property name="src" value="src" />
 	<property name="lib-path" value="lib" />
 	<property name="build-dest" value="build" />
@@ -64,8 +65,9 @@
 			<fileset dir="lib">
 			</fileset>
 		</copy>
-		<copy file="${config-file}" todir="${manager-dest}">
-		</copy>
+		<copy file="${config-file}" todir="${manager-dest}" />
+		<copy file="${log-config-file}" todir="${manager-dest}"/>
+		<!--<copy file="${log-config-file}" todir="${manager-dest}"/>-->
 	</target>
 
 	<!--	build collector	-->
@@ -89,6 +91,7 @@
 			<fileset dir="lib">
 			</fileset>
 		</copy>
+		<copy file="${log-config-file}" todir="${collector-dest}"/>
 	</target>
 
 	<!--	build monitor	-->
@@ -114,6 +117,7 @@
 		</copy>
 		<echo>Copy the sigar native library</echo>
 		<copy file="${lib-path}/libsigar-amd64-linux.so" todir="${monitor-dest}" />
+		<copy file="${log-config-file}" todir="${monitor-dest}"/>
 	</target>
 
 	<!-- build subscriber library -->

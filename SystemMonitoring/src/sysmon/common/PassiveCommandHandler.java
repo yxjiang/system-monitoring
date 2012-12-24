@@ -27,7 +27,7 @@ public abstract class PassiveCommandHandler extends	CommandHandler {
 		super();
 		this.ipAddress = IPUtil.getFirstAvailableIP();
 		if(ipAddress == null) {
-			Out.println("This machine cannot access the network.");
+			out.println("This machine cannot access the network.");
 			System.exit(1);
 		}
 		this.servicePort = servicePort;

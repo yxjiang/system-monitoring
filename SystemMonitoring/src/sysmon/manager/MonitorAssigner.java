@@ -3,6 +3,7 @@ package sysmon.manager;
 import java.util.Map;
 
 import sysmon.manager.MonitoringManager.CollectorProfile;
+import sysmon.util.Out;
 
 /**
  * Assign the monitor to proper collector.
@@ -11,10 +12,12 @@ import sysmon.manager.MonitoringManager.CollectorProfile;
  */
 public abstract class MonitorAssigner {
 	
+	protected Out out;
 	protected Map<String, CollectorProfile> collectorsProfiles;
 	
 	public MonitorAssigner(Map<String, CollectorProfile> collectorsProfiles) {
 		this.collectorsProfiles = collectorsProfiles;
+		this.out = new Out();
 	}
 	
 	/**

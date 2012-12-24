@@ -37,7 +37,7 @@ public class LoadBalanceAssigner extends MonitorAssigner{
 			collectorsProfiles.put(assignedCollector, assignedCollectorProfile);
 		}
 		
-		Out.println("Assign [" + monitorName + "] to [" + assignedCollectorProfile.collectorBrokerAddress + "]");
+		out.println("Assign [" + monitorName + "] to [" + assignedCollectorProfile.collectorBrokerAddress + "]");
 		return assignedCollectorProfile.collectorBrokerAddress;
 	}
 

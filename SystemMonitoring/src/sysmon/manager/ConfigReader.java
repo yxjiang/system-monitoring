@@ -27,6 +27,7 @@ import com.google.gson.JsonObject;
 public class ConfigReader {
 	
 	private static Document doc;
+	private static Out out = new Out();
 	
 	/**
 	 * Get the configuration about how to assign monitors to collectors.
@@ -53,11 +54,11 @@ public class ConfigReader {
 			}
 			return assignConfigObj;
 		} catch (ParserConfigurationException e) {
-			Out.println("When reading config file. " + e.getMessage());
+			out.println("When reading config file. " + e.getMessage());
 		} catch (SAXException e) {
-			Out.println("When reading config file. " + e.getMessage());
+			out.println("When reading config file. " + e.getMessage());
 		} catch (IOException e) {
-			Out.println("When reading config file. " + e.getMessage());
+			out.println("When reading config file. " + e.getMessage());
 		} 
 		
 		return null;
@@ -101,11 +102,11 @@ public class ConfigReader {
 			}
 			return alertsConfigArray;
 		} catch (ParserConfigurationException e) {
-			Out.println("When reading config file. " + e.getMessage());
+			out.println("When reading config file. " + e.getMessage());
 		} catch (SAXException e) {
-			Out.println("When reading config file. " + e.getMessage());
+			out.println("When reading config file. " + e.getMessage());
 		} catch (IOException e) {
-			Out.println("When reading config file. " + e.getMessage());
+			out.println("When reading config file. " + e.getMessage());
 		} 
 		return null;
 	}

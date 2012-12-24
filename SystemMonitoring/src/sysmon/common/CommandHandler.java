@@ -9,6 +9,8 @@ import javax.jms.Topic;
 
 import org.apache.activemq.broker.BrokerService;
 
+import sysmon.util.Out;
+
 import com.google.gson.JsonParser;
 
 /**
@@ -18,6 +20,7 @@ import com.google.gson.JsonParser;
  */
 public abstract class CommandHandler implements MessageListener{
 	
+	protected Out out;
 	protected BrokerService broker;
 	protected Session commandServiceSession;
 	protected MessageProducer commandProducer;
@@ -27,6 +30,7 @@ public abstract class CommandHandler implements MessageListener{
 	
 	public CommandHandler() {
 		this.jsonParser = new JsonParser();
+		this.out = new Out();
 	}
 	
 	/**

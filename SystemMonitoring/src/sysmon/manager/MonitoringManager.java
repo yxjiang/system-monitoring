@@ -9,6 +9,9 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import sysmon.common.PassiveCommandHandler;
 import sysmon.util.GlobalParameters;
 import sysmon.util.Out;
@@ -29,6 +32,7 @@ import com.google.gson.JsonPrimitive;
 public class MonitoringManager {
 
 	private static MonitoringManager instance;
+	private Out out;
 
 	private ManagerPassiveCommandHandler passiveCommandHandler;
 	private Map<String, CollectorProfile> collectorsProfiles;
@@ -48,6 +52,8 @@ public class MonitoringManager {
 	}
 
 	private MonitoringManager() {
+		Logger globalLogger = LogManager.getLogger("Global");
+		this.out = new Out();
 		this.collectorsProfiles = new HashMap<String, CollectorProfile>();
 		this.alertJsonConfig = ConfigReader.getAlertsConfig();
 		JsonObject assignStrategy = ConfigReader.getCollectorAssignConfig();
@@ -58,10 +64,10 @@ public class MonitoringManager {
 		}
 
 		if (this.alertJsonConfig == null) {
-			Out.println("Config file config.xml cannot be found!");
+			out.println("Config file config.xml cannot be found!");
 			System.exit(1);
 		} else {
-			Out.println("Read config file.");
+			out.println("Read config file.");
 		}
 		this.passiveCommandHandler = new ManagerPassiveCommandHandler(
 				GlobalParameters.MANAGER_COMMAND_PORT);
@@ -124,7 +130,7 @@ public class MonitoringManager {
 
 		public ManagerPassiveCommandHandler(String servicePort) {
 			super(servicePort);
-			Out.println("Start command service at " + this.brokerAddress);
+			out.println("Start command service at " + this.brokerAddress);
 		}
 
 		@Override
@@ -153,7 +159,7 @@ public class MonitoringManager {
 						handleRetrieveMonitorsByCollector(commandJsonObj, commandMessage);
 					}
 					else {
-						Out.println("Receive unidentified command.");
+						out.println("Receive unidentified command.");
 					}
 					
 				} catch (JMSException e) {
@@ -181,7 +187,7 @@ public class MonitoringManager {
 			responseMessage.setJMSCorrelationID(commandMessage.getJMSCorrelationID());
 			responseMessage.setText(responseJson.toString());
 			this.commandProducer.send(commandMessage.getJMSReplyTo(), responseMessage);
-			Out.println("Monitor [" + monitorName + "] registered.");
+			out.println("Monitor [" + monitorName + "] registered.");
 		}
 
 		/**
@@ -200,7 +206,7 @@ public class MonitoringManager {
 			responseJson.addProperty("type", "collector-registration-response");
 			responseJson.addProperty("value", "success");
 			responseJson.add("alertsConfig", alertJsonConfig);
-			Out.println("Collector [" + collectorIPAddress + "] registered.");
+			out.println("Collector [" + collectorIPAddress + "] registered.");
 			TextMessage responseMessage = this.commandServiceSession.createTextMessage();
 			responseMessage.setJMSCorrelationID(commandMessage.getJMSCorrelationID());
 			responseMessage.setText(responseJson.toString());
@@ -215,7 +221,7 @@ public class MonitoringManager {
 		 * @throws JMSException
 		 */
 		private void handleRetrieveCollectors(Message commandMessage) throws JMSException {
-			Out.println("Receive retrieve-collectors command.");
+			out.println("Receive retrieve-collectors command.");
 			JsonObject responseJson = new JsonObject();
 			responseJson.addProperty("type", "retrieve-collectors-response");
 			JsonArray collectorArray = new JsonArray();
@@ -261,7 +267,7 @@ public class MonitoringManager {
 		 * @throws JMSException
 		 */
 		private void handleRetrieveMonitors(Message commandMessage) throws JMSException {
-			Out.println("Receive retrieve-monitors command.");
+			out.println("Receive retrieve-monitors command.");
 			JsonObject responseJson = new JsonObject();
 			responseJson.addProperty("type", "retrieve-monitors-response");
 
@@ -287,7 +293,7 @@ public class MonitoringManager {
 		 * @throws JMSException
 		 */
 		private void handleRetrieveMonitorsByCollector(JsonObject commandJsonObj, Message commandMessage) throws JMSException {
-			Out.println("Receive retrieve-monitors-by-collector command.");
+			out.println("Receive retrieve-monitors-by-collector command.");
 			
 			if(!commandJsonObj.has("collector")) {
 				return;

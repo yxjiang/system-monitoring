@@ -11,9 +11,7 @@ import javax.jms.TextMessage;
 
 import sysmon.collector.alert.CpuUsageAlert;
 import sysmon.common.InitiativeCommandHandler;
-import sysmon.common.MetadataBuffer;
 import sysmon.common.PassiveCommandHandler;
-import sysmon.common.ThreadSafeMetadataBuffer;
 import sysmon.common.metadata.MachineMetadata;
 import sysmon.util.GlobalParameters;
 import sysmon.util.IPUtil;
@@ -32,7 +30,7 @@ import com.google.gson.JsonObject;
  *
  */
 public class Collector {
-	
+	private Out out;
 	private String managerBrokerAddress;
 	
 	private int metadataStreamCapacity;
@@ -44,6 +42,7 @@ public class Collector {
 	private CEPStream cepStream;
 	
 	public Collector(String managerBrokerAddress, int capacity) {
+		this.out = new Out();
 		this.metadataStreamCapacity = capacity;
 		this.collectorIPAddress = IPUtil.getFirstAvailableIP();
 		this.collectorCommandBrokerAddress = "tcp://" + this.collectorIPAddress + ":" + GlobalParameters.COLLECTOR_COMMAND_PORT;
@@ -55,7 +54,7 @@ public class Collector {
 	
 	public void start() {
 		commandSender.registerToManager();
-		Out.println("Registered to manager. Start service at " + collectorCommandBrokerAddress);
+		out.println("Registered to manager. Start service at " + collectorCommandBrokerAddress);
 	}
 	
 	/**
@@ -78,7 +77,6 @@ public class Collector {
 //		public String monitorCommandBrokerAddress;
 		public String staticMetadata;
 		public long secondSinceLastAccess;
-		public MetadataBuffer metadataBuffer;
 		
 		public MonitorProfile(String monitorIPAddress, String staticMetadata) {
 			super();
@@ -86,7 +84,6 @@ public class Collector {
 //			this.monitorCommandBrokerAddress = monitorCommandBrokerAddress;
 			this.staticMetadata = staticMetadata;
 			this.secondSinceLastAccess = 0;
-			this.metadataBuffer = new ThreadSafeMetadataBuffer(metadataStreamCapacity);
 		}
 		
 	}
@@ -111,9 +108,9 @@ public class Collector {
 					String type = jsonObj.get("type").getAsString();
 					if(type.equals("monitor-enroll")) {
 						String enrollMonitorIPAddress = jsonObj.get("machineIPAddress").getAsString();
-						Out.println(enrollMonitorIPAddress + " come to enroll.");
+						out.println(enrollMonitorIPAddress + " come to enroll.");
 						JsonObject staticMetadataObj = jsonObj.get("staticMetadata").getAsJsonObject();
-						Out.println("Static meta-data:" + staticMetadataObj.toString());
+						out.println("Static meta-data:" + staticMetadataObj.toString());
 						MonitorProfile monitorProfile = new MonitorProfile(enrollMonitorIPAddress, staticMetadataObj.toString());
 						monitorsAddresses.put(enrollMonitorIPAddress, monitorProfile);
 					}
@@ -168,7 +165,7 @@ public class Collector {
 				registerCommandMessage.setText(commandJson.toString());
 				commandProducer.send(registerCommandMessage);
 			} catch (JMSException e) {
-				Out.error("Register to manager failed.");
+				out.error("Register to manager failed.");
 			}
 
 		}
@@ -181,7 +178,7 @@ public class Collector {
 				 */
 				try {
 					String commandJson = ((TextMessage) commandMessage).getText();
-					Out.println(commandJson);
+					out.println(commandJson);
 					JsonObject jsonObj = (JsonObject)jsonParser.parse(commandJson);
 					if(jsonObj.get("type").getAsString().equals("collector-registration-response") && 
 							jsonObj.get("value").getAsString().equals("success")) {
@@ -190,7 +187,7 @@ public class Collector {
 							JsonArray configJsonArray = configElement.getAsJsonArray();
 							initAlertMonitors(configJsonArray);
 						}
-						Out.println("Registration successfully.");
+						out.println("Registration successfully.");
 					}
 				} catch (JMSException e) {
 					e.printStackTrace();
@@ -228,7 +225,7 @@ public class Collector {
 					String idleTimeAlertThresholdStr = parameters.get("idleTimeAlertThreshold").getAsJsonObject().get("value").getAsString();
 					new CpuUsageAlert(cepService, Integer.parseInt(timeWindowStr), Float.parseFloat(idleTimeAlertThresholdStr));
 				}
-				Out.println("Add alert [" + alertJson.get("type").getAsString() + "].");
+				out.println("Add alert [" + alertJson.get("type").getAsString() + "].");
 			}
 			
 		}

@@ -37,6 +37,7 @@ import com.google.gson.JsonObject;
  */
 public class Monitor {
 	
+	private Out out;
 	private String managerBrokerAddress;
 	private String machinerIPAddress;
 	private long moniterInterval = 1;	//	In seconds
@@ -241,7 +242,7 @@ public class Monitor {
 						sendMonitoredData();
 					} catch (JMSException e) {
 						if(e.getMessage().equals("The Session is closed")) {
-							Out.println("Cannot connect to collector [" + collectorCommandBrokerAddress + "]");
+							out.println("Cannot connect to collector [" + collectorCommandBrokerAddress + "]");
 						}
 					}
 					try {
@@ -280,7 +281,7 @@ public class Monitor {
 				registerCommandMessage.setText(commandJson.toString());
 				commandProducer.send(registerCommandMessage);
 			} catch (JMSException e) {
-				Out.error("Register to manager failed.");
+				out.error("Register to manager failed.");
 				System.exit(1);
 			}
 		}
@@ -318,11 +319,11 @@ public class Monitor {
 					JsonObject jsonObj = (JsonObject)jsonParser.parse(commandJson);
 					if(jsonObj.get("type").getAsString().equals("monitor-registration-response") && 
 							jsonObj.get("value").getAsString().equals("success")) {
-						Out.println(commandJson);
+						out.println(commandJson);
 						collectorCommandBrokerAddress = jsonObj.get("collectorCommandBrokerAddress").getAsString();
-						Out.println("Intend to enroll to " + collectorCommandBrokerAddress);
+						out.println("Intend to enroll to " + collectorCommandBrokerAddress);
 						monitorEnroll();
-						Out.println("Registration successfully.");
+						out.println("Registration successfully.");
 					}
 				} catch (JMSException e) {
 					e.printStackTrace();
