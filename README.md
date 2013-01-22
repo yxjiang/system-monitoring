@@ -8,3 +8,5 @@ The monitor is used to be deployed into the computers that need to be monitored.
 The collector is responsible for gathering the computer trace data from the monitors. It also exposes the interface to enable the external systems to pull the meta-data it collects.
 
 The master is in charge of assigning the monitors to collectors. Once a monitor is assigned, it would directly communicate with the collector, and would not bother the manager until the collector cannot be connected. 
+
+[Wiki](https://github.com/yxjiang/system-monitoring/wiki)
