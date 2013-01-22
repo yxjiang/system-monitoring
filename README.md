@@ -9,4 +9,4 @@ The collector is responsible for gathering the computer trace data from the moni
 
 The master is in charge of assigning the monitors to collectors. Once a monitor is assigned, it would directly communicate with the collector, and would not bother the manager until the collector cannot be connected. 
 
-[Wiki](https://github.com/yxjiang/system-monitoring/wiki)
+The wiki of this project is available [here](https://github.com/yxjiang/system-monitoring/wiki).
