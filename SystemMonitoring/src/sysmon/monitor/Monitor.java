@@ -24,6 +24,7 @@ import sysmon.common.metadata.MachineMetadata;
 import sysmon.common.metadata.MemoryMetadata;
 import sysmon.monitor.crawler.CPUCrawler;
 import sysmon.monitor.crawler.Crawler;
+import sysmon.monitor.crawler.DiskCrawler;
 import sysmon.monitor.crawler.MemoryCrawler;
 import sysmon.util.GlobalParameters;
 import sysmon.util.IPUtil;
@@ -348,8 +349,10 @@ public class Monitor {
 		Monitor m = new Monitor(managerBrokerAddress);
 		Crawler cpuCrawler = new CPUCrawler("cpu");
 		Crawler memoryCrawler = new MemoryCrawler("memory");
+		Crawler diskCrawler = new DiskCrawler("disk");
 		m.addCrawler(cpuCrawler);
 		m.addCrawler(memoryCrawler);
+		m.addCrawler(diskCrawler);
 		m.start();
 	}
 	

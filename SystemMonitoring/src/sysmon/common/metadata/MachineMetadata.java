@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import sysmon.monitor.crawler.MemoryCrawler;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 public class MachineMetadata implements Serializable{
@@ -74,5 +76,10 @@ public class MachineMetadata implements Serializable{
 		return metadata;
 	}
 	
+	@Override
+	public String toString() {
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		return gson.toJson(this.getJson());
+	}
 	
 }

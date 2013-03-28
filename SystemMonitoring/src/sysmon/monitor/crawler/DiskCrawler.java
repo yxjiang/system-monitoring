@@ -45,7 +45,6 @@ public class DiskCrawler extends Crawler<DiskMetadata>{
 			Set<Map.Entry<String, FileSystem>> entrySet = fsMap.entrySet();
 			List<DiskMetadata.FS> fsMetadataList = new ArrayList<DiskMetadata.FS>();
 			for (Map.Entry<String, FileSystem> fsEntry : entrySet) {
-				JsonObject fsObj = new JsonObject();
 				String fsDirName = fsEntry.getKey();
 				FileSystem fs = fsEntry.getValue();
 				if (!fsMap.isMounted(fsDirName)) 

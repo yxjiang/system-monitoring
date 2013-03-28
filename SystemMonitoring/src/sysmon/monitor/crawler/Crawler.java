@@ -14,14 +14,12 @@ public abstract class Crawler<T>{
 	
 	protected String crawlerName;
 	protected JsonObject staticMetaData;
-	protected JsonObject dynamicMetaData;
 	protected SigarProxy sigarProxy;
 	protected T metadataObject;
 	
 	public Crawler(String crawlerName) {
 		this.crawlerName = crawlerName;
 		this.staticMetaData = new JsonObject();
-		this.dynamicMetaData = new JsonObject();
 		this.sigarProxy = Humidor.getInstance().getSigar();
 		updateStaticMetaData();
 		updateDynamicMetaData();
@@ -46,9 +44,6 @@ public abstract class Crawler<T>{
 		JsonObject newDynamicMetaData = new JsonObject();
 		newDynamicMetaData.addProperty("type", this.crawlerName);
 		fetchDynamicMetaDataHelper(newDynamicMetaData);
-		synchronized (dynamicMetaData) {
-			this.dynamicMetaData = newDynamicMetaData;
-		}
 	}
 	
 	/**
@@ -58,12 +53,6 @@ public abstract class Crawler<T>{
 	
 	public JsonObject getStaticMetaData() {
 		return staticMetaData;
-	}
-	
-	public JsonObject getDynamicMetaData() {
-		synchronized(dynamicMetaData	) {
-			return this.dynamicMetaData;
-		}
 	}
 	
 	/**

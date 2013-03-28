@@ -31,7 +31,7 @@ public class CPUCrawler extends Crawler<CpuMetadata>{
 		try {
 			CpuInfo[] cpuInfos = sigarProxy.getCpuInfoList();
 			CpuInfo firstCPU = cpuInfos[0];
-			this.staticMetaData.addProperty("total-cores", firstCPU.getTotalCores());
+			this.staticMetaData.addProperty("totalCores", firstCPU.getTotalCores());
 			this.staticMetaData.addProperty("vendor", firstCPU.getVendor());
 			this.staticMetaData.addProperty("model", firstCPU.getModel());
 			this.staticMetaData.addProperty("Mhz", firstCPU.getMhz());
@@ -55,13 +55,6 @@ public class CPUCrawler extends Crawler<CpuMetadata>{
 				combinedTime = combinedTime < 1.0 ? combinedTime : 1.0;
 				double idleTime = cpuPercs[i].getIdle();
 				idleTime = idleTime < 1.0 ? idleTime : 1.0;
-				
-//				JsonObject singleCpu = new JsonObject();
-//				singleCpu.addProperty("user-time", userTime);
-//				singleCpu.addProperty("sys-time", sysTime);
-//				singleCpu.addProperty("combined-time", combinedTime);
-//				singleCpu.addProperty("idle-time", idleTime);
-//				newMetaData.add("core-" + i, singleCpu);
 				
 				cores[i] = new CpuMetadata.Core(userTime, sysTime, combinedTime, idleTime);
 			}

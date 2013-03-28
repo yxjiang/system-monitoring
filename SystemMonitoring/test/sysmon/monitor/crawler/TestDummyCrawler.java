@@ -9,6 +9,5 @@ public class TestDummyCrawler{
 		Crawler c = new DummyCrawler("dummy-crawler");
 		c.updateDynamicMetaData();
 		System.out.println(c.getStaticMetaData());
-		System.out.println(c.getDynamicMetaData());
 	}
 }

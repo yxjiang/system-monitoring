@@ -35,7 +35,7 @@ public class MemoryCrawler extends Crawler<MemoryMetadata> {
 		} catch (SigarException e) {
 			e.printStackTrace();
 		}
-		this.staticMetaData.addProperty("total-memory", mem.getTotal());
+		this.staticMetaData.addProperty("totalMemory", mem.getTotal());
 	}
 
 	@Override
@@ -59,10 +59,10 @@ public class MemoryCrawler extends Crawler<MemoryMetadata> {
 		
 		this.metadataObject = memoryMetadata;
 		
-//		Map<Object, Object> map = mem.toMap();
-//		for(Map.Entry<Object, Object> entry : map.entrySet()) {
-//			newMetaData.addProperty(entry.getKey().toString(), entry.getValue().toString());
-//		}
+		Map<Object, Object> map = mem.toMap();
+		for(Map.Entry<Object, Object> entry : map.entrySet()) {
+			newMetaData.addProperty(entry.getKey().toString(), entry.getValue().toString());
+		}
 		
 	}
 

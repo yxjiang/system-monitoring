@@ -2,6 +2,8 @@ package sysmon.common.metadata;
 
 import java.util.List;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -12,7 +14,9 @@ public class DiskMetadata {
 	
 	public DiskMetadata(List<FS> fileSystems) {
 		this.type = "disk";
-		this.fileSystems = (FS[])fileSystems.toArray();
+		this.fileSystems = new FS[fileSystems.size()];
+		for (int i = 0; i < fileSystems.size(); ++i)
+			this.fileSystems[i] = fileSystems.get(i);
 	}
 	
 	public FS[] getFileSystems() {
@@ -30,6 +34,12 @@ public class DiskMetadata {
 			fileSystemArr.add(fs.getJson());
 		metadata.add("file-systems", fileSystemArr);
 		return metadata;
+	}
+	
+	@Override
+	public String toString() {
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		return gson.toJson(this.getJson());
 	}
 
 	/**

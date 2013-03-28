@@ -2,6 +2,8 @@ package sysmon.common.metadata;
 
 import java.io.Serializable;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 public class MemoryMetadata implements Serializable{
@@ -97,6 +99,12 @@ public class MemoryMetadata implements Serializable{
 		jsonObj.addProperty("total", total);
 		
 		return jsonObj;
+	}
+	
+	@Override
+	public String toString() {
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		return gson.toJson(this.getJson());
 	}
 	
 }

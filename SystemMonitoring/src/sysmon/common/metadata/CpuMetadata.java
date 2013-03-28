@@ -2,6 +2,8 @@ package sysmon.common.metadata;
 
 import java.io.Serializable;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -77,6 +79,12 @@ public class CpuMetadata implements Serializable{
 		metadata.add("cores", coresJson);
 		
 		return metadata;
+	}
+	
+	@Override
+	public String toString() {
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		return gson.toJson(this.getJson());
 	}
 
 	public static class Core implements Serializable{

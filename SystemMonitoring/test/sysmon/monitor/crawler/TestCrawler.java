@@ -18,7 +18,6 @@ public abstract class TestCrawler {
 	
 	@Test
 	public void testGetDynamicMetadata() {
-		JsonObject dynamicJson = c.getDynamicMetaData();
-		System.out.printf("Dynamic metadata: %s\n", gson.toJson(dynamicJson));
+		System.out.printf("Dynamic metadata: %s\n", c.getMetadataObject());
 	}
 }
