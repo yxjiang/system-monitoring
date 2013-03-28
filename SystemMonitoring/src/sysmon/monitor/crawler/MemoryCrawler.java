@@ -18,7 +18,6 @@ import com.google.gson.JsonObject;
 public class MemoryCrawler extends Crawler<MemoryMetadata> {
 
 	private Mem mem;
-	private Gson gson;
 
 	public MemoryCrawler(String crawlerName) {
 		super(crawlerName);
@@ -31,9 +30,8 @@ public class MemoryCrawler extends Crawler<MemoryMetadata> {
 
 	@Override
 	protected void updateStaticMetaData() {
-		gson = new Gson();
 		try {
-			mem = sigar.getMem();
+			mem = sigarProxy.getMem();
 		} catch (SigarException e) {
 			e.printStackTrace();
 		}
@@ -43,7 +41,7 @@ public class MemoryCrawler extends Crawler<MemoryMetadata> {
 	@Override
 	protected void fetchDynamicMetaDataHelper(JsonObject newMetaData) {
 		try {
-			mem = sigar.getMem();
+			mem = sigarProxy.getMem();
 		} catch (SigarException e) {
 			e.printStackTrace();
 		}

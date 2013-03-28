@@ -19,6 +19,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 import sysmon.common.InitiativeCommandHandler;
 import sysmon.common.metadata.CpuMetadata;
+import sysmon.common.metadata.DiskMetadata;
 import sysmon.common.metadata.MachineMetadata;
 import sysmon.common.metadata.MemoryMetadata;
 import sysmon.monitor.crawler.CPUCrawler;
@@ -146,6 +147,9 @@ public class Monitor {
 			}
 			else if(metadataObject instanceof MemoryMetadata) {
 				machineMetadata.setMemory((MemoryMetadata)metadataObject);
+			}
+			else if (metadataObject instanceof DiskMetadata) {
+				machineMetadata.setDisk((DiskMetadata)metadataObject);
 			}
 		}
 		

@@ -12,6 +12,7 @@ public class MachineMetadata implements Serializable{
 	private String machineIP;
 	private CpuMetadata cpu;
 	private MemoryMetadata memory;
+	private DiskMetadata disk;
 	
 	public MachineMetadata(long timestamp, String machineIP) {
 		super();
@@ -19,6 +20,7 @@ public class MachineMetadata implements Serializable{
 		this.machineIP = machineIP;
 		this.cpu = null;
 		this.memory = null;
+		this.disk = null;
 	}
 
 	public long getTimestamp() {
@@ -36,7 +38,7 @@ public class MachineMetadata implements Serializable{
 	public void setMachineIP(String machineIP) {
 		this.machineIP = machineIP;
 	}
-
+	
 	public CpuMetadata getCpu() {
 		return cpu;
 	}
@@ -53,6 +55,14 @@ public class MachineMetadata implements Serializable{
 		this.memory = memory;
 	}
 	
+	public DiskMetadata getDisk() {
+		return disk;
+	}
+
+	public void setDisk(DiskMetadata disk) {
+		this.disk = disk;
+	}
+
 	public JsonObject getJson() {
 		JsonObject metadata = new JsonObject();
 		

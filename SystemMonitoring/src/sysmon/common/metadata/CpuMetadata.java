@@ -85,8 +85,7 @@ public class CpuMetadata implements Serializable{
 		private double combinedTime;
 		private double idleTime;
 
-		public Core(double userTime, double sysTime, double combinedTime,
-				double idleTime) {
+		public Core(double userTime, double sysTime, double combinedTime, double idleTime) {
 			super();
 			this.userTime = userTime;
 			this.sysTime = sysTime;

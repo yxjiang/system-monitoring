@@ -1,6 +1,7 @@
 package sysmon.monitor.crawler;
 
-import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.Humidor;
+import org.hyperic.sigar.SigarProxy;
 
 import com.google.gson.JsonObject;
 
@@ -14,14 +15,14 @@ public abstract class Crawler<T>{
 	protected String crawlerName;
 	protected JsonObject staticMetaData;
 	protected JsonObject dynamicMetaData;
-	protected Sigar sigar;
+	protected SigarProxy sigarProxy;
 	protected T metadataObject;
 	
 	public Crawler(String crawlerName) {
 		this.crawlerName = crawlerName;
 		this.staticMetaData = new JsonObject();
 		this.dynamicMetaData = new JsonObject();
-		this.sigar = new Sigar();
+		this.sigarProxy = Humidor.getInstance().getSigar();
 		updateStaticMetaData();
 		updateDynamicMetaData();
 	}

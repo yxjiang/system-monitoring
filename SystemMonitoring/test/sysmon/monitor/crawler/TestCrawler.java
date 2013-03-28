@@ -13,12 +13,12 @@ public abstract class TestCrawler {
 	@Test
 	public void testGetStaticMetadata() {
 		JsonObject staticJson = c.getStaticMetaData();
-		System.out.println(staticJson.toString());
+		System.out.printf("Static metadata: %s\n", staticJson.toString());
 	}
 	
 	@Test
 	public void testGetDynamicMetadata() {
 		JsonObject dynamicJson = c.getDynamicMetaData();
-		System.out.println(gson.toJson(dynamicJson));
+		System.out.printf("Dynamic metadata: %s\n", gson.toJson(dynamicJson));
 	}
 }

@@ -24,7 +24,7 @@ public class ProcessCrawler extends Crawler{
 
 	@Override
 	protected void updateStaticMetaData() {
-
+		//	there is no statistic metadata for process, everything is changing
 	}
 	
 
@@ -33,7 +33,7 @@ public class ProcessCrawler extends Crawler{
 	protected void fetchDynamicMetaDataHelper(JsonObject newMetaData) {
 		JsonArray procsJson = new JsonArray();
 		try {
-			long[] pids = sigar.getProcList();
+			long[] pids = sigarProxy.getProcList();
 			for(int i = 0; i < pids.length; ++i) {
 				procsJson.add(getProcInfo(pids[i]));
 			}
@@ -50,10 +50,11 @@ public class ProcessCrawler extends Crawler{
 	 */
 	private JsonObject getProcInfo(long pid) throws SigarException {
 		JsonObject procDetailJson = new JsonObject();
-		ProcState procState = sigar.getProcState(pid);
+		ProcState procState = sigarProxy.getProcState(pid);
 		procDetailJson.addProperty("pid", pid);
 		procDetailJson.addProperty("name", procState.getName());
 		procDetailJson.addProperty("state", procState.getState());
+		procDetailJson.addProperty("numThreads", procState.getThreads());
 		return procDetailJson;
 	}
 	

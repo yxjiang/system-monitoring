@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
 
 public class TestMemoryCrawler extends TestCrawler{
 	@Before
-	public void init() {
+	public void setup() {
 		gson = new GsonBuilder().setPrettyPrinting().create();
 		c = new MemoryCrawler("memory");
 	}

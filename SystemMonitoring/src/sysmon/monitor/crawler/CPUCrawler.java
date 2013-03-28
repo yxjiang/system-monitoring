@@ -29,7 +29,7 @@ public class CPUCrawler extends Crawler<CpuMetadata>{
 	@Override
 	protected void updateStaticMetaData() {
 		try {
-			CpuInfo[] cpuInfos = sigar.getCpuInfoList();
+			CpuInfo[] cpuInfos = sigarProxy.getCpuInfoList();
 			CpuInfo firstCPU = cpuInfos[0];
 			this.staticMetaData.addProperty("total-cores", firstCPU.getTotalCores());
 			this.staticMetaData.addProperty("vendor", firstCPU.getVendor());
@@ -43,7 +43,7 @@ public class CPUCrawler extends Crawler<CpuMetadata>{
 	@Override
 	protected void fetchDynamicMetaDataHelper(JsonObject newMetaData) {
 		try {
-			CpuPerc[] cpuPercs = sigar.getCpuPercList();
+			CpuPerc[] cpuPercs = sigarProxy.getCpuPercList();
 			CpuMetadata.Core[] cores = new CpuMetadata.Core[cpuPercs.length];
 			for(int i = 0; i < cpuPercs.length; ++i) {
 				
