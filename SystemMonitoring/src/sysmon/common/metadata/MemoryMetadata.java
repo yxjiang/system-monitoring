@@ -6,105 +6,105 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-public class MemoryMetadata implements Serializable{
-	private String type;
-	private long used;
-	private long actualUsed;
-	private double freePercent;
-	private long actualFree;
-	private long ram;
-	private double usedPercent;
-	private long free;
-	private long total;
-	
-	public MemoryMetadata() {
-		type = "memory";
-	}
+public class MemoryMetadata implements Serializable {
+  private String type;
+  private long used;
+  private long actualUsed;
+  private double freePercent;
+  private long actualFree;
+  private long ram;
+  private double usedPercent;
+  private long free;
+  private long total;
 
-	public long getUsed() {
-		return used;
-	}
+  public MemoryMetadata() {
+    type = "memory";
+  }
 
-	public void setUsed(long used) {
-		this.used = used;
-	}
+  public long getUsed() {
+    return used;
+  }
 
-	public long getActualUsed() {
-		return actualUsed;
-	}
+  public void setUsed(long used) {
+    this.used = used;
+  }
 
-	public void setActualUsed(long actualUsed) {
-		this.actualUsed = actualUsed;
-	}
+  public long getActualUsed() {
+    return actualUsed;
+  }
 
-	public double getFreePercent() {
-		return freePercent;
-	}
+  public void setActualUsed(long actualUsed) {
+    this.actualUsed = actualUsed;
+  }
 
-	public void setFreePercent(double freePercent) {
-		this.freePercent = freePercent;
-	}
+  public double getFreePercent() {
+    return freePercent;
+  }
 
-	public long getActualFree() {
-		return actualFree;
-	}
+  public void setFreePercent(double freePercent) {
+    this.freePercent = freePercent;
+  }
 
-	public void setActualFree(long actualFree) {
-		this.actualFree = actualFree;
-	}
+  public long getActualFree() {
+    return actualFree;
+  }
 
-	public long getRam() {
-		return ram;
-	}
+  public void setActualFree(long actualFree) {
+    this.actualFree = actualFree;
+  }
 
-	public void setRam(long ram) {
-		this.ram = ram;
-	}
+  public long getRam() {
+    return ram;
+  }
 
-	public double getUsedPercent() {
-		return usedPercent;
-	}
+  public void setRam(long ram) {
+    this.ram = ram;
+  }
 
-	public void setUsedPercent(double usedPercent) {
-		this.usedPercent = usedPercent;
-	}
+  public double getUsedPercent() {
+    return usedPercent;
+  }
 
-	public long getFree() {
-		return free;
-	}
+  public void setUsedPercent(double usedPercent) {
+    this.usedPercent = usedPercent;
+  }
 
-	public void setFree(long free) {
-		this.free = free;
-	}
+  public long getFree() {
+    return free;
+  }
 
-	public long getTotal() {
-		return total;
-	}
+  public void setFree(long free) {
+    this.free = free;
+  }
 
-	public void setTotal(long total) {
-		this.total = total;
-	}
-	
-	public JsonObject getJson() {
-		JsonObject jsonObj = new JsonObject();
-		
-		jsonObj.addProperty("type", type);
-		jsonObj.addProperty("used", used);
-		jsonObj.addProperty("actualUsed", actualUsed);
-		jsonObj.addProperty("freePercent", freePercent);
-		jsonObj.addProperty("actualFree", actualFree);
-		jsonObj.addProperty("ram", ram);
-		jsonObj.addProperty("usedPercent", usedPercent);
-		jsonObj.addProperty("free", free);
-		jsonObj.addProperty("total", total);
-		
-		return jsonObj;
-	}
-	
-	@Override
-	public String toString() {
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		return gson.toJson(this.getJson());
-	}
-	
+  public long getTotal() {
+    return total;
+  }
+
+  public void setTotal(long total) {
+    this.total = total;
+  }
+
+  public JsonObject getJson() {
+    JsonObject jsonObj = new JsonObject();
+
+    jsonObj.addProperty("type", type);
+    jsonObj.addProperty("used", used);
+    jsonObj.addProperty("actualUsed", actualUsed);
+    jsonObj.addProperty("freePercent", freePercent);
+    jsonObj.addProperty("actualFree", actualFree);
+    jsonObj.addProperty("ram", ram);
+    jsonObj.addProperty("usedPercent", usedPercent);
+    jsonObj.addProperty("free", free);
+    jsonObj.addProperty("total", total);
+
+    return jsonObj;
+  }
+
+  @Override
+  public String toString() {
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    return gson.toJson(this.getJson());
+  }
+
 }

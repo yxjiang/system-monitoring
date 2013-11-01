@@ -17,47 +17,49 @@ import com.google.gson.JsonObject;
 
 /**
  * Fetch the metadata related to the disk utilization
+ * 
  * @author yexijiang
- *
+ * 
  */
-public class DiskCrawler extends Crawler<DiskMetadata>{
+public class DiskCrawler extends Crawler<DiskMetadata> {
 
-	public DiskCrawler(String crawlerName) {
-		super(crawlerName);
-	}
+  public DiskCrawler(String crawlerName) {
+    super(crawlerName);
+  }
 
-	@Override
-	public String getCrawlerType() {
-		return "disk";
-	}
+  @Override
+  public String getCrawlerType() {
+    return "disk";
+  }
 
-	@Override
-	protected void updateStaticMetaData() {
-		//	everything is dynamic
-	}
+  @Override
+  protected void updateStaticMetaData() {
+    // everything is dynamic
+  }
 
-	@Override
-	protected void fetchDynamicMetaDataHelper(JsonObject newMetaData) {
-		try {
-			FileSystem[] fsList = sigarProxy.getFileSystemList();
-			FileSystemMap fsMap = new FileSystemMap();
-			fsMap.init(fsList);
-			Set<Map.Entry<String, FileSystem>> entrySet = fsMap.entrySet();
-			List<DiskMetadata.FS> fsMetadataList = new ArrayList<DiskMetadata.FS>();
-			for (Map.Entry<String, FileSystem> fsEntry : entrySet) {
-				String fsDirName = fsEntry.getKey();
-				FileSystem fs = fsEntry.getValue();
-				if (!fsMap.isMounted(fsDirName)) 
-					continue;
-				FileSystemUsage fsUsage = sigarProxy.getFileSystemUsage(fsDirName);
-				DiskMetadata.FS fsMetadata = new DiskMetadata.FS(fs.getDevName(), fs.getDirName(), fs.getTypeName(), 
-						fs.getSysTypeName(), fsUsage.getTotal(), fsUsage.getUsed(), fsUsage.getUsePercent());
-				fsMetadataList.add(fsMetadata);
-			}
-			this.metadataObject = new DiskMetadata(fsMetadataList);
-		} catch (SigarException e) {
-			e.printStackTrace();
-		}
-	}
+  @Override
+  protected void fetchDynamicMetaDataHelper(JsonObject newMetaData) {
+    try {
+      FileSystem[] fsList = sigarProxy.getFileSystemList();
+      FileSystemMap fsMap = new FileSystemMap();
+      fsMap.init(fsList);
+      Set<Map.Entry<String, FileSystem>> entrySet = fsMap.entrySet();
+      List<DiskMetadata.FS> fsMetadataList = new ArrayList<DiskMetadata.FS>();
+      for (Map.Entry<String, FileSystem> fsEntry : entrySet) {
+        String fsDirName = fsEntry.getKey();
+        FileSystem fs = fsEntry.getValue();
+        if (!fsMap.isMounted(fsDirName))
+          continue;
+        FileSystemUsage fsUsage = sigarProxy.getFileSystemUsage(fsDirName);
+        DiskMetadata.FS fsMetadata = new DiskMetadata.FS(fs.getDevName(),
+            fs.getDirName(), fs.getTypeName(), fs.getSysTypeName(),
+            fsUsage.getTotal(), fsUsage.getUsed(), fsUsage.getUsePercent());
+        fsMetadataList.add(fsMetadata);
+      }
+      this.metadataObject = new DiskMetadata(fsMetadataList);
+    } catch (SigarException e) {
+      e.printStackTrace();
+    }
+  }
 
 }
